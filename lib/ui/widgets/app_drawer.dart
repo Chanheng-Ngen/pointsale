@@ -140,7 +140,7 @@ class AppDrawer extends StatelessWidget {
                   label: 'Home',
                   isActive: true,
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/');
                   },
                 ),
                 _buildMenuItem(
@@ -148,7 +148,7 @@ class AppDrawer extends StatelessWidget {
                   label: 'Checkout',
                   onTap: () {
                     // Handle Checkout navigation
-                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/checkout');
                   },
                 ),
                 _buildMenuItem(

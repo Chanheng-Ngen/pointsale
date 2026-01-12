@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_drawer.dart';
+import 'checkout_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -30,7 +31,7 @@ class HomeScreen extends StatelessWidget {
                   bottomRight: Radius.circular(24),
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(24, 42, 24, 0),
+              padding: const EdgeInsets.fromLTRB(16, 42, 16, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -57,7 +58,7 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 73),
+                      const SizedBox(width: 16),
                       const Expanded(
                         child: Text(
                           'PointSale',
@@ -71,6 +72,7 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     ],
+                    
                   ),
                   const SizedBox(height: 24),
                   
@@ -134,7 +136,7 @@ class HomeScreen extends StatelessWidget {
             
             // Content Section
             Padding(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -156,7 +158,12 @@ class HomeScreen extends StatelessWidget {
                     iconColor: const Color(0xFF00B8D0),
                     label: 'Quick Sale',
                     onTap: () {
-                      // Handle Quick Sale
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CheckoutScreen(),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 12),

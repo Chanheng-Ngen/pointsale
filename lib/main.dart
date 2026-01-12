@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:point_sale/ui/views/checkout_screen.dart';
 import 'package:point_sale/ui/views/home_screen.dart';
 
 void main() {
@@ -17,7 +18,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00B8D0)),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      routes: {
+        '/': (context) => const HomeScreen(),
+        '/checkout': (context) => const CheckoutScreen(),
+      },
     );
   }
 }
