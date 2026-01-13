@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:point_sale/ui/widgets/app_drawer.dart';
 import '../../data/models/product_model.dart';
+import '../../providers/cart_provider.dart';
 import '../widgets/product_card.dart';
 import 'cart_screen.dart';
 
@@ -14,15 +16,14 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _searchController = TextEditingController();
 
-  List<Product> products = [
+  final List<Product> products = [
     Product(
       id: '1',
       name: 'Wireless Mouse',
       emoji: '🖱️',
       price: 29.99,
-      quantity: 1,
     ),
-    Product(id: '2', name: 'USB Cable', emoji: '🔌', price: 9.9, quantity: 1),
+    Product(id: '2', name: 'USB Cable', emoji: '🔌', price: 9.9),
     Product(id: '3', name: 'Keyboard', emoji: '⌨️', price: 79.99),
     Product(id: '4', name: 'Monitor', emoji: '🖥️', price: 299.99),
     Product(id: '5', name: 'Headphones', emoji: '🎧', price: 149.99),
@@ -35,41 +36,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     Product(id: '12', name: 'USB Hub', emoji: '🔌', price: 34.99),
   ];
 
-  int get totalCartItems {
-    return products.where((p) => p.quantity > 0).length;
-  }
-
-  void addToCart(String productId) {
-    setState(() {
-      final index = products.indexWhere((p) => p.id == productId);
-      if (index != -1) {
-        products[index] = products[index].copyWith(quantity: 1);
-      }
-    });
-  }
-
-  void incrementQuantity(String productId) {
-    setState(() {
-      final index = products.indexWhere((p) => p.id == productId);
-      if (index != -1) {
-        products[index] = products[index].copyWith(
-          quantity: products[index].quantity + 1,
-        );
-      }
-    });
-  }
-
-  void decrementQuantity(String productId) {
-    setState(() {
-      final index = products.indexWhere((p) => p.id == productId);
-      if (index != -1 && products[index].quantity > 0) {
-        products[index] = products[index].copyWith(
-          quantity: products[index].quantity - 1,
-        );
-      }
-    });
-  }
-
   @override
   void dispose() {
     _searchController.dispose();
@@ -78,310 +44,313 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Scaffold(
-          backgroundColor: const Color(0xFFF9FAFB),
-          drawer: const AppDrawer(),
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            elevation: 0,
-            shadowColor: Colors.black.withOpacity(0.1),
-            bottom: PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child: Container(
-                color: const Color(0xFFE5E7EB),
-                height: 1,
-              ),
-            ),
-            leading: Builder(
-              builder: (context) => Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: IconButton(
-                  padding: EdgeInsets.zero,
-                  icon: const Icon(
-                    Icons.menu,
-                    color: Color(0xFF4A5565),
-                    size: 24,
+    return Consumer<CartProvider>(
+      builder: (context, cart, child) {
+        return Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Scaffold(
+              backgroundColor: const Color(0xFFF9FAFB),
+              drawer: const AppDrawer(),
+              appBar: AppBar(
+                backgroundColor: Colors.white,
+                elevation: 0,
+                shadowColor: Colors.black.withOpacity(0.1),
+                bottom: PreferredSize(
+                  preferredSize: const Size.fromHeight(1),
+                  child: Container(
+                    color: const Color(0xFFE5E7EB),
+                    height: 1,
                   ),
-                  onPressed: () {
-                    Scaffold.of(context).openDrawer();
-                  },
                 ),
-              ),
-            ),
-            title: const Text(
-              'Checkout',
-              style: TextStyle(
-                fontFamily: 'Arimo',
-                fontSize: 20,
-                color: Color(0xFF4A5565),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            centerTitle: true,
-            actions: [
-              Padding(
-                padding: const EdgeInsets.only(right: 16),
-                child: InkWell(
-                  onTap: () {
-                    if (totalCartItems > 0) {
-                      final cartItems = products
-                          .where((p) => p.quantity > 0)
-                          .toList();
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              CartScreen(cartItems: cartItems),
-                        ),
-                      );
-                    }
-                  },
-                  borderRadius: BorderRadius.circular(10),
-                  child: SizedBox(
+                leading: Builder(
+                  builder: (context) => Container(
                     width: 40,
                     height: 40,
-                    child: Stack(
-                      clipBehavior: Clip.none, // Allow overflow
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF00B8DB),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.shopping_cart,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        ),
-                        if (totalCartItems > 0)
-                          Positioned(
-                            right: -4,
-                            top: -4,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFE7000B),
-                                shape: BoxShape.circle,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: IconButton(
+                      padding: EdgeInsets.zero,
+                      icon: const Icon(
+                        Icons.menu,
+                        color: Color(0xFF4A5565),
+                        size: 24,
+                      ),
+                      onPressed: () {
+                        Scaffold.of(context).openDrawer();
+                      },
+                    ),
+                  ),
+                ),
+                title: const Text(
+                  'Checkout',
+                  style: TextStyle(
+                    fontFamily: 'Arimo',
+                    fontSize: 20,
+                    color: Color(0xFF4A5565),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                centerTitle: true,
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 16),
+                    child: InkWell(
+                      onTap: () {
+                        if (cart.totalItems > 0) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const CartScreen(),
+                            ),
+                          );
+                        }
+                      },
+                      borderRadius: BorderRadius.circular(10),
+                      child: SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: Stack(
+                          clipBehavior: Clip.none, // Allow overflow
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF00B8DB),
+                                borderRadius: BorderRadius.circular(10),
                               ),
-                              constraints: const BoxConstraints(
-                                minWidth: 20,
-                                minHeight: 20,
+                              child: const Icon(
+                                Icons.shopping_cart,
+                                color: Colors.white,
+                                size: 20,
                               ),
-                              child: Center(
-                                child: Text(
-                                  '$totalCartItems',
-                                  style: const TextStyle(
-                                    fontFamily: 'Arimo',
-                                    fontSize: 12,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w600,
-                                    height: 1.0,
+                            ),
+                            if (cart.totalItems > 0)
+                              Positioned(
+                                right: -4,
+                                top: -4,
+                                child: Container(
+                                  padding: const EdgeInsets.all(4),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFE7000B),
+                                    shape: BoxShape.circle,
                                   ),
+                                  constraints: const BoxConstraints(
+                                    minWidth: 20,
+                                    minHeight: 20,
+                                  ),
+                                  child: Center(
+                                    child: Text(
+                                      '${cart.totalItems}',
+                                      style: const TextStyle(
+                                        fontFamily: 'Arimo',
+                                        fontSize: 12,
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.0,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              body: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    height: 1,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4A5565).withOpacity(0.3),
+                      borderRadius: BorderRadius.circular(1),
+                    ),
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Search Bar
+                          Container(
+                            height: 42.296,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: const Color(0xFFD1D5DC),
+                                width: 1.15,
+                              ),
+                            ),
+                            child: TextField(
+                              controller: _searchController,
+                              decoration: InputDecoration(
+                                hintText: 'Search products...',
+                                hintStyle: TextStyle(
+                                  fontFamily: 'Arimo',
+                                  fontSize: 16,
+                                  color: const Color(0xFF0A0A0A).withOpacity(0.5),
+                                ),
+                                prefixIcon: const Icon(
+                                  Icons.search,
+                                  size: 20,
+                                  color: Color(0xFF6A7282),
+                                ),
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
                                 ),
                               ),
                             ),
                           ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                height: 1,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF4A5565).withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(1),
-                ),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Search Bar
-                      Container(
-                        height: 42.296,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(
-                            color: const Color(0xFFD1D5DC),
-                            width: 1.15,
-                          ),
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            hintText: 'Search products...',
-                            hintStyle: TextStyle(
+                          const SizedBox(height: 16),
+
+                          // Section Title
+                          const Text(
+                            'AVAILABLE PRODUCTS',
+                            style: TextStyle(
                               fontFamily: 'Arimo',
-                              fontSize: 16,
-                              color: const Color(0xFF0A0A0A).withOpacity(0.5),
-                            ),
-                            prefixIcon: const Icon(
-                              Icons.search,
-                              size: 20,
+                              fontSize: 14,
                               color: Color(0xFF6A7282),
-                            ),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 8,
+                              letterSpacing: 0.35,
                             ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                          const SizedBox(height: 12),
 
-                      // Section Title
-                      const Text(
-                        'AVAILABLE PRODUCTS',
-                        style: TextStyle(
-                          fontFamily: 'Arimo',
-                          fontSize: 14,
-                          color: Color(0xFF6A7282),
-                          letterSpacing: 0.35,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-
-                      // Product Grid
-                      Expanded(
-                        child: GridView.builder(
-                          padding: EdgeInsets.zero,
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                crossAxisSpacing: 12,
-                                mainAxisSpacing: 12,
-                                childAspectRatio: 0.85,
-                              ),
-                          itemCount: products.length,
-                          itemBuilder: (context, index) {
-                            return ProductCard(
-                              product: products[index],
-                              onAddPressed: () {
-                                addToCart(products[index].id);
+                          // Product Grid
+                          Expanded(
+                            child: GridView.builder(
+                              padding: EdgeInsets.zero,
+                              gridDelegate:
+                                  const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: 12,
+                                    mainAxisSpacing: 12,
+                                    childAspectRatio: 0.85,
+                                  ),
+                              itemCount: products.length,
+                              itemBuilder: (context, index) {
+                                final product = products[index];
+                                // Get quantity from cart
+                                final cartItem = cart.items.firstWhere(
+                                  (item) => item.id == product.id,
+                                  orElse: () => product,
+                                );
+                                
+                                return ProductCard(
+                                  product: cartItem,
+                                  onAddPressed: () {
+                                    cart.addProduct(product);
+                                  },
+                                  onIncrement: () {
+                                    cart.incrementQuantity(product.id);
+                                  },
+                                  onDecrement: () {
+                                    cart.decrementQuantity(product.id);
+                                  },
+                                );
                               },
-                              onIncrement: () {
-                                incrementQuantity(products[index].id);
-                              },
-                              onDecrement: () {
-                                decrementQuantity(products[index].id);
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Floating View Cart Button
-        if (totalCartItems > 0)
-          Positioned(
-            bottom: 75,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    // Navigate to cart with items that have quantity > 0
-                    final cartItems = products
-                        .where((p) => p.quantity > 0)
-                        .toList();
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => CartScreen(cartItems: cartItems),
-                      ),
-                    );
-                  },
-                  borderRadius: BorderRadius.circular(100),
-                  child: Container(
-                    height: 53,
-                    padding: const EdgeInsets.only(left: 24, right: 0),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF00B8DB),
-                      borderRadius: BorderRadius.circular(100),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 15,
-                          offset: const Offset(0, 10),
-                          spreadRadius: -3,
-                        ),
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 6,
-                          offset: const Offset(0, 4),
-                          spreadRadius: -4,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.shopping_cart,
-                          color: Colors.white,
-                          size: 24,
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'View Cart',
-                              style: TextStyle(
-                                fontFamily: 'Arimo',
-                                fontSize: 14,
-                                color: Colors.white,
-                                height: 1.43,
-                              ),
                             ),
-                            Text(
-                              '$totalCartItems items',
-                              style: const TextStyle(
-                                fontFamily: 'Arimo',
-                                fontSize: 16,
-                                color: Colors.white,
-                                height: 1.5,
-                              ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Floating View Cart Button
+            if (cart.totalItems > 0)
+              Positioned(
+                bottom: 75,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CartScreen(),
+                          ),
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(100),
+                      child: Container(
+                        height: 53,
+                        padding: const EdgeInsets.only(left: 24, right: 0),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF00B8DB),
+                          borderRadius: BorderRadius.circular(100),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 15,
+                              offset: const Offset(0, 10),
+                              spreadRadius: -3,
+                            ),
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.1),
+                              blurRadius: 6,
+                              offset: const Offset(0, 4),
+                              spreadRadius: -4,
                             ),
                           ],
                         ),
-                        const SizedBox(width: 24),
-                      ],
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.shopping_cart,
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                            const SizedBox(width: 12),
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'View Cart',
+                                  style: TextStyle(
+                                    fontFamily: 'Arimo',
+                                    fontSize: 14,
+                                    color: Colors.white,
+                                    height: 1.43,
+                                  ),
+                                ),
+                                Text(
+                                  '${cart.totalItems} items',
+                                  style: const TextStyle(
+                                    fontFamily: 'Arimo',
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(width: 24),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ),
-      ],
+          ],
+        );
+      },
     );
   }
 }

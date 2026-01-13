@@ -5,6 +5,9 @@ class AppDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get the current route
+    final currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
+    
     return Drawer(
       child: Column(
         children: [
@@ -138,7 +141,7 @@ class AppDrawer extends StatelessWidget {
                 _buildMenuItem(
                   icon: Icons.home,
                   label: 'Home',
-                  isActive: true,
+                  isActive: currentRoute == '/',
                   onTap: () {
                     Navigator.pushNamed(context, '/');
                   },
@@ -146,65 +149,65 @@ class AppDrawer extends StatelessWidget {
                 _buildMenuItem(
                   icon: Icons.shopping_cart,
                   label: 'Checkout',
+                  isActive: currentRoute == '/checkout',
                   onTap: () {
-                    // Handle Checkout navigation
                     Navigator.pushNamed(context, '/checkout');
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.receipt_long,
                   label: 'Orders',
+                  isActive: currentRoute == '/orders',
                   onTap: () {
-                    // Handle Orders navigation
-                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/orders');
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.inventory_2,
                   label: 'Products',
+                  isActive: currentRoute == '/products',
                   onTap: () {
-                    // Handle Products navigation
-                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/products');
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.inventory,
                   label: 'Stock Management',
+                  isActive: currentRoute == '/stock',
                   onTap: () {
-                    // Handle Stock Management navigation
-                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/stock');
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.swap_horiz,
                   label: 'Transactions',
+                  isActive: currentRoute == '/transactions',
                   onTap: () {
-                    // Handle Transactions navigation
-                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/transactions');
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.bar_chart,
                   label: 'Analytics',
+                  isActive: currentRoute == '/analytics',
                   onTap: () {
-                    // Handle Analytics navigation
-                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/analytics');
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.settings,
                   label: 'Settings',
+                  isActive: currentRoute == '/settings',
                   onTap: () {
-                    // Handle Settings navigation
-                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/settings');
                   },
                 ),
                 _buildMenuItem(
                   icon: Icons.info,
                   label: 'About Us',
+                  isActive: currentRoute == '/about',
                   onTap: () {
-                    // Handle About Us navigation
-                    Navigator.pop(context);
+                    Navigator.pushNamed(context, '/about');
                   },
                 ),
               ],
