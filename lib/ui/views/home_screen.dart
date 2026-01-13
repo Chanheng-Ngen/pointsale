@@ -158,12 +158,7 @@ class HomeScreen extends StatelessWidget {
                     iconColor: const Color(0xFF00B8D0),
                     label: 'Quick Sale',
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CheckoutScreen(),
-                        ),
-                      );
+                      Navigator.pushNamed(context, '/checkout');
                     },
                   ),
                   const SizedBox(height: 12),
@@ -172,7 +167,7 @@ class HomeScreen extends StatelessWidget {
                     iconColor: const Color(0xFF155DFC),
                     label: 'View Orders',
                     onTap: () {
-                      // Handle View Orders
+                      Navigator.pushNamed(context, '/orders');
                     },
                   ),
                   const SizedBox(height: 12),
@@ -181,7 +176,7 @@ class HomeScreen extends StatelessWidget {
                     iconColor: const Color(0xFF00D492),
                     label: 'Manage Products',
                     onTap: () {
-                      // Handle Manage Products
+                      Navigator.pushNamed(context, '/manage_products');
                     },
                   ),
                   const SizedBox(height: 16),
