@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../widgets/base_text_field.dart';
 import '../../widgets/base_button.dart';
-import 'sign_up_screen.dart';
 import 'forgot_password_screen.dart';
+import 'package:point_sale/core/constants/app_color.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -26,7 +26,7 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppColor.whiteWithOpacity(0.95),
       body: Center(
         child: SingleChildScrollView(
           child: Container(
@@ -45,7 +45,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         fontFamily: 'Arimo',
                         fontSize: 30,
                         fontWeight: FontWeight.normal,
-                        color: Color(0xFF4A5565),
+                        color: AppColor.textSecondary,
                         height: 1.2,
                       ),
                       textAlign: TextAlign.center,
@@ -56,7 +56,7 @@ class _SignInScreenState extends State<SignInScreen> {
                         style: TextStyle(
                           fontFamily: 'Arimo',
                           fontSize: 16,
-                          color: Color(0xFF4A5565),
+                          color: AppColor.textSecondary,
                           height: 1.5,
                         ),
                         children: [
@@ -103,7 +103,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
                             size: 19.989,
-                            color: const Color(0xFF6A7282),
+                            color: AppColor.textSecondary,
                           ),
                           onPressed: () {
                             setState(() {
@@ -118,7 +118,7 @@ class _SignInScreenState extends State<SignInScreen> {
                       BaseButton(
                         text: 'Sign In',
                         onPressed: () {
-                          // Handle sign in
+                          Navigator.pushNamed(context, '/');
                         },
                       ),
                     ],
@@ -141,7 +141,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     style: TextStyle(
                       fontFamily: 'Arimo',
                       fontSize: 14,
-                      color: Color(0xFF00B8DB),
+                      color: AppColor.primary,
                       height: 1.43,
                     ),
                   ),
@@ -153,28 +153,28 @@ class _SignInScreenState extends State<SignInScreen> {
                   width: double.infinity,
                   child: Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Divider(
-                          color: Color(0xFFD1D5DC),
+                          color: AppColor.whiteWithOpacity(0.8),
                           thickness: 1.15,
                         ),
                       ),
                       Container(
-                        color: const Color(0xFFF9FAFB),
+                        color: Colors.transparent,
                         padding: const EdgeInsets.symmetric(horizontal: 16),
                         child: const Text(
                           'Or continue with',
                           style: TextStyle(
                             fontFamily: 'Arimo',
                             fontSize: 14,
-                            color: Color(0xFF6A7282),
+                            color: AppColor.textSecondary,
                             height: 1.43,
                           ),
                         ),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Divider(
-                          color: Color(0xFFD1D5DC),
+                          color: AppColor.whiteWithOpacity(0.8),
                           thickness: 1.15,
                         ),
                       ),
@@ -213,11 +213,9 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                     TextButton(
                       onPressed: () {
-                        Navigator.push(
+                        Navigator.pushNamed(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => const SignUpScreen(),
-                          ),
+                          '/sign_up',
                         );
                       },
                       style: TextButton.styleFrom(
@@ -225,12 +223,12 @@ class _SignInScreenState extends State<SignInScreen> {
                         minimumSize: Size.zero,
                         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
-                      child: const Text(
+                      child: Text(
                         'Sign up',
                         style: TextStyle(
                           fontFamily: 'Arimo',
                           fontSize: 16,
-                          color: Color(0xFF00B8DB),
+                          color: AppColor.primary,
                           height: 1.5,
                         ),
                       ),

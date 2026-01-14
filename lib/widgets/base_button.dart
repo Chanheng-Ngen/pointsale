@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:point_sale/core/constants/app_color.dart';
 class BaseButton extends StatelessWidget {
   final String text;
   final VoidCallback onPressed;
@@ -25,8 +25,8 @@ class BaseButton extends StatelessWidget {
           ? ElevatedButton(
               onPressed: onPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF00B8D0),
-                foregroundColor: Colors.white,
+                backgroundColor: AppColor.primary,
+                foregroundColor: AppColor.whiteWithOpacity(0.9),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -45,7 +45,7 @@ class BaseButton extends StatelessWidget {
               onPressed: onPressed,
               style: OutlinedButton.styleFrom(
                 side: const BorderSide(
-                  color: Color(0xFF00B8D0),
+                  color: AppColor.primary,
                   width: 1.15,
                 ),
                 shape: RoundedRectangleBorder(
@@ -63,7 +63,7 @@ class BaseButton extends StatelessWidget {
                           style: const TextStyle(
                             fontFamily: 'Arimo',
                             fontSize: 16,
-                            color: Color(0xFF4A5565),
+                            color: AppColor.textSecondary,
                             height: 1.5,
                           ),
                         ),
@@ -74,7 +74,7 @@ class BaseButton extends StatelessWidget {
                       style: const TextStyle(
                         fontFamily: 'Arimo',
                         fontSize: 16,
-                        color: Color(0xFF4A5565),
+                        color: AppColor.textSecondary,
                         height: 1.5,
                       ),
                     ),

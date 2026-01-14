@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:point_sale/core/constants/app_color.dart';
 class BaseTextField extends StatelessWidget {
   final String label;
   final String hintText;
@@ -30,7 +30,7 @@ class BaseTextField extends StatelessWidget {
           style: const TextStyle(
             fontFamily: 'Arimo',
             fontSize: 14,
-            color: Color(0xFF364153),
+            color: AppColor.textPrimary,
             height: 1.43,
           ),
         ),
@@ -44,25 +44,25 @@ class BaseTextField extends StatelessWidget {
             hintStyle: TextStyle(
               fontFamily: 'Arimo',
               fontSize: 16,
-              color: const Color(0xFF0A0A0A).withOpacity(0.5),
+              color: AppColor.textSecondary,
             ),
             prefixIcon: Icon(
               prefixIcon,
               size: 19.989,
-              color: const Color(0xFF6A7282),
+              color: AppColor.textSecondary,
             ),
             suffixIcon: suffixIcon,
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(
-                color: Color(0xFFD1D5DC),
+                color: AppColor.borderMedium,
                 width: 1.15,
               ),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(
-                color: Color(0xFF00B8D0),
+                color: AppColor.primary,
                 width: 1.15,
               ),
             ),

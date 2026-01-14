@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:point_sale/ui/widgets/app_drawer.dart';
-import '../../data/models/product_model.dart';
-import '../../providers/cart_provider.dart';
+import 'package:point_sale/widgets/app_drawer.dart';
+import '../models/product_model.dart';
+import '../providers/cart_provider.dart';
 import '../widgets/product_card.dart';
 import 'cart_screen.dart';
 
