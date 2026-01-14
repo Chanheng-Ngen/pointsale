@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:point_sale/core/constants/app_color.dart';
 
 class PaymentMethodModal extends StatefulWidget {
   final double totalAmount;
@@ -23,7 +24,7 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
       child: Container(
         width: double.infinity,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColor.whiteWithOpacity(0.9),
           borderRadius: BorderRadius.circular(16),
         ),
         padding: const EdgeInsets.all(24),
@@ -39,7 +40,7 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                   style: TextStyle(
                     fontFamily: 'Arimo',
                     fontSize: 20,
-                    color: Color(0xFF0A0A0A),
+                    color: AppColor.textPrimary,
                     height: 1.4,
                   ),
                 ),
@@ -55,7 +56,7 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                     child: const Icon(
                       Icons.close,
                       size: 20,
-                      color: Color(0xFF0A0A0A),
+                      color: AppColor.textPrimary,
                     ),
                   ),
                 ),
@@ -94,7 +95,7 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF9FAFB),
+                color: AppColor.whiteWithOpacity(0.9),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
@@ -105,7 +106,7 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                     style: TextStyle(
                       fontFamily: 'Arimo',
                       fontSize: 16,
-                      color: Color(0xFF4A5565),
+                      color: AppColor.textSecondary,
                       height: 1.5,
                     ),
                   ),
@@ -114,7 +115,7 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                     style: const TextStyle(
                       fontFamily: 'Arimo',
                       fontSize: 24,
-                      color: Color(0xFF00B8DB),
+                      color: AppColor.primary,
                       height: 1.33,
                     ),
                   ),
@@ -138,7 +139,7 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF0A0A0A),
                         side: const BorderSide(
-                          color: Color(0xFFD1D5DC),
+                          color: AppColor.borderMedium,
                           width: 1.15,
                         ),
                         shape: RoundedRectangleBorder(
@@ -167,8 +168,8 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                         Navigator.pop(context, selectedPaymentMethod);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00B8DB),
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColor.primary,
+                        foregroundColor: AppColor.whiteWithOpacity(0.9),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),

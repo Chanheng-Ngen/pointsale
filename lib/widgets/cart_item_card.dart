@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../data/models/product_model.dart';
+import '../models/product_model.dart';
+import 'package:point_sale/core/constants/app_color.dart';
 
 class CartItemCard extends StatelessWidget {
   final Product product;
@@ -22,20 +23,20 @@ class CartItemCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(17),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColor.whiteWithOpacity(0.95),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFFE5E7EB),
+          color: AppColor.borderMedium,
           width: 1.15,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: AppColor.blackWithOpacity(0.1),
             blurRadius: 3,
             offset: const Offset(0, 1),
           ),
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: AppColor.blackWithOpacity(0.1),
             blurRadius: 2,
             offset: const Offset(0, 1),
             spreadRadius: -1,
@@ -44,7 +45,6 @@ class CartItemCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Top Row: Image, Name, Price, Delete
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -53,7 +53,7 @@ class CartItemCard extends StatelessWidget {
                 width: 64,
                 height: 64,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
+                  color: AppColor.borderMedium,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Center(
@@ -77,7 +77,7 @@ class CartItemCard extends StatelessWidget {
                       style: const TextStyle(
                         fontFamily: 'Arimo',
                         fontSize: 18,
-                        color: Color(0xFF0A0A0A),
+                        color: AppColor.textPrimary,
                         height: 1.5,
                       ),
                     ),
@@ -87,7 +87,7 @@ class CartItemCard extends StatelessWidget {
                       style: const TextStyle(
                         fontFamily: 'Arimo',
                         fontSize: 16,
-                        color: Color(0xFF4A5565),
+                        color: AppColor.textSecondary,
                         height: 1.5,
                       ),
                     ),
@@ -104,7 +104,7 @@ class CartItemCard extends StatelessWidget {
                   padding: const EdgeInsets.all(8),
                   child: const Icon(
                     Icons.delete_outline,
-                    color: Color(0xFFEF4444),
+                    color: AppColor.error,
                     size: 20,
                   ),
                 ),
@@ -120,7 +120,7 @@ class CartItemCard extends StatelessWidget {
               Container(
                 height: 40,
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF3F4F6),
+                  color: AppColor.borderMedium,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -139,7 +139,7 @@ class CartItemCard extends StatelessWidget {
                         child: const Icon(
                           Icons.remove,
                           size: 16,
-                          color: Color(0xFF0A0A0A),
+                          color: AppColor.textPrimary,
                         ),
                       ),
                     ),
@@ -152,7 +152,7 @@ class CartItemCard extends StatelessWidget {
                           style: const TextStyle(
                             fontFamily: 'Arimo',
                             fontSize: 16,
-                            color: Color(0xFF0A0A0A),
+                            color: AppColor.textPrimary,
                             height: 1.5,
                           ),
                         ),
@@ -171,7 +171,7 @@ class CartItemCard extends StatelessWidget {
                         child: const Icon(
                           Icons.add,
                           size: 16,
-                          color: Color(0xFF0A0A0A),
+                          color: AppColor.textPrimary,
                         ),
                       ),
                     ),
@@ -184,7 +184,7 @@ class CartItemCard extends StatelessWidget {
                 style: const TextStyle(
                   fontFamily: 'Arimo',
                   fontSize: 18,
-                  color: Color(0xFF0A0A0A),
+                  color: AppColor.textPrimary,
                   height: 1.56,
                 ),
               ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:point_sale/core/constants/app_color.dart';
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
 
@@ -20,8 +20,8 @@ class AppDrawer extends StatelessWidget {
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
                 colors: [
-                  Color(0xFF4A5565),
-                  Color(0xFF00B8DB),
+                  AppColor.textSecondary,
+                  AppColor.primary,
                 ],
               ),
             ),
@@ -34,12 +34,12 @@ class AppDrawer extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
+                      Text(
                         'Menu',
                         style: TextStyle(
                           fontFamily: 'Arimo',
                           fontSize: 20,
-                          color: Colors.white,
+                          color: AppColor.whiteWithOpacity(0.9),
                           height: 1.4,
                         ),
                       ),
@@ -49,9 +49,9 @@ class AppDrawer extends StatelessWidget {
                           minWidth: 40,
                           minHeight: 40,
                         ),
-                        icon: const Icon(
+                        icon: Icon(
                           Icons.close,
-                          color: Colors.white,
+                          color: AppColor.whiteWithOpacity(0.9),
                           size: 24,
                         ),
                         onPressed: () => Navigator.pop(context),
@@ -64,7 +64,7 @@ class AppDrawer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.1),
+                      color: AppColor.whiteWithOpacity(0.7),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: Row(
@@ -73,17 +73,17 @@ class AppDrawer extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.2),
+                            color: AppColor.whiteWithOpacity(0.9),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.person,
-                            color: Colors.white,
+                            color: AppColor.textSecondary,
                             size: 24,
                           ),
                         ),
                         const SizedBox(width: 12),
-                        const Expanded(
+                        Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -92,7 +92,7 @@ class AppDrawer extends StatelessWidget {
                                 style: TextStyle(
                                   fontFamily: 'Arimo',
                                   fontSize: 16,
-                                  color: Colors.white,
+                                  color: AppColor.textSecondary,
                                   height: 1.5,
                                 ),
                               ),
@@ -101,7 +101,7 @@ class AppDrawer extends StatelessWidget {
                                 style: TextStyle(
                                   fontFamily: 'Arimo',
                                   fontSize: 14,
-                                  color: Colors.white70,
+                                  color: AppColor.textSecondary,
                                   height: 1.43,
                                 ),
                               ),
@@ -121,7 +121,6 @@ class AppDrawer extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
               children: [
-                // Navigation Label
                 const Padding(
                   padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Text(
@@ -129,15 +128,13 @@ class AppDrawer extends StatelessWidget {
                     style: TextStyle(
                       fontFamily: 'Arimo',
                       fontSize: 12,
-                      color: Color(0xFF6A7282),
+                      color: AppColor.textSecondary,
                       letterSpacing: 0.3,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
                 const SizedBox(height: 4),
-                
-                // Navigation Items
                 _buildMenuItem(
                   icon: Icons.home,
                   label: 'Home',
@@ -216,10 +213,10 @@ class AppDrawer extends StatelessWidget {
           
           // Sign Out Button
           Container(
-            decoration: const BoxDecoration(
+            decoration: BoxDecoration(
               border: Border(
                 top: BorderSide(
-                  color: Color(0xFFE5E7EB),
+                  color: AppColor.whiteWithOpacity(0.9),
                   width: 1.15,
                 ),
               ),
@@ -227,8 +224,7 @@ class AppDrawer extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
             child: InkWell(
               onTap: () {
-                // Handle sign out
-                Navigator.pop(context);
+                Navigator.pushNamed(context, '/signin');
               },
               borderRadius: BorderRadius.circular(14),
               child: Padding(
@@ -237,7 +233,7 @@ class AppDrawer extends StatelessWidget {
                   children: [
                     const Icon(
                       Icons.logout,
-                      color: Color(0xFFE7000B),
+                      color: AppColor.error,
                       size: 20,
                     ),
                     const SizedBox(width: 12),
@@ -246,7 +242,7 @@ class AppDrawer extends StatelessWidget {
                       style: TextStyle(
                         fontFamily: 'Arimo',
                         fontSize: 16,
-                        color: Color(0xFFE7000B),
+                        color: AppColor.error,
                         height: 1.5,
                       ),
                     ),
@@ -269,7 +265,7 @@ class AppDrawer extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
-        color: isActive ? const Color(0xFF00B8DB).withOpacity(0.16) : Colors.transparent,
+        color: isActive ? AppColor.primary.withOpacity(0.16) : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
       ),
       child: ListTile(
@@ -278,21 +274,21 @@ class AppDrawer extends StatelessWidget {
         leading: Icon(
           icon,
           size: 20,
-          color: const Color(0xFF4A5565),
+          color: AppColor.textSecondary,
         ),
         title: Text(
           label,
           style: const TextStyle(
             fontFamily: 'Arimo',
             fontSize: 16,
-            color: Color(0xFF364153),
+            color: AppColor.textSecondary,
             height: 1.5,
           ),
         ),
         trailing: const Icon(
           Icons.chevron_right,
           size: 16,
-          color: Color(0xFF4A5565),
+          color: AppColor.textSecondary,
         ),
         onTap: onTap,
       ),

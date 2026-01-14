@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../data/models/product_model.dart';
+import '../models/product_model.dart';
+import 'package:point_sale/core/constants/app_color.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -19,10 +20,10 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColor.whiteWithOpacity(0.95),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: const Color(0xFFE5E7EB),
+          color: AppColor.borderMedium,
           width: 1.15,
         ),
       ),
@@ -31,7 +32,7 @@ class ProductCard extends StatelessWidget {
           // Emoji Icon
           const SizedBox(height: 16),
           SizedBox(
-            height: 40,
+            height: 56,
             child: Center(
               child: Text(
                 product.emoji,
@@ -53,7 +54,7 @@ class ProductCard extends StatelessWidget {
               style: const TextStyle(
                 fontFamily: 'Arimo',
                 fontSize: 14,
-                color: Color(0xFF0A0A0A),
+                color: AppColor.textPrimary,
                 height: 1.43,
               ),
             ),
@@ -68,12 +69,11 @@ class ProductCard extends StatelessWidget {
               fontFamily: 'Arimo',
               fontSize: 16,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF00B8DB),
+              color: AppColor.primary,
               height: 1.5,
             ),
           ),
-          const Spacer(),
-          
+          const Spacer(flex: 1,),
           // Add Button or Quantity Control
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
@@ -83,7 +83,7 @@ class ProductCard extends StatelessWidget {
               child: product.isInCart
                   ? Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFF00B8DB).withOpacity(0.75),
+                        color: AppColor.primary.withOpacity(0.75),
                         borderRadius: BorderRadius.circular(10),
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -100,20 +100,20 @@ class ProductCard extends StatelessWidget {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.remove,
                                 size: 16,
-                                color: Colors.white,
+                                color: AppColor.whiteWithOpacity(0.95),
                               ),
                             ),
                           ),
                           // Quantity
                           Text(
                             '${product.quantity}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontFamily: 'Arimo',
                               fontSize: 16,
-                              color: Colors.white,
+                              color: AppColor.whiteWithOpacity(0.95),
                               height: 1.5,
                             ),
                           ),
@@ -127,10 +127,10 @@ class ProductCard extends StatelessWidget {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: const Icon(
+                              child:  Icon(
                                 Icons.add,
                                 size: 16,
-                                color: Colors.white,
+                                color: AppColor.whiteWithOpacity(0.95),
                               ),
                             ),
                           ),
@@ -140,21 +140,21 @@ class ProductCard extends StatelessWidget {
                   : ElevatedButton(
                       onPressed: onAddPressed,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00B8DB),
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColor.primary,
+                        foregroundColor: AppColor.whiteWithOpacity(0.95),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         elevation: 0,
                         padding: EdgeInsets.zero,
                       ),
-                      child: const Row(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.add,
                             size: 16,
-                            color: Colors.white,
+                            color: AppColor.whiteWithOpacity(0.95),
                           ),
                           SizedBox(width: 8),
                           Text(
