@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:point_sale/providers/stock_provider.dart';
+import 'package:point_sale/providers/transaction_provider.dart';
 import 'package:point_sale/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'package:point_sale/providers/cart_provider.dart';
@@ -6,7 +8,10 @@ import 'package:point_sale/providers/cart_provider.dart';
 void main() {
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => CartProvider()),
+      providers: [
+        ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => StockProvider()),
+        ChangeNotifierProvider(create: (_) => TransactionProvider()),
       ],
       child: const MyApp(),
     ),
