@@ -7,6 +7,7 @@ import 'package:point_sale/providers/transaction_provider.dart';
 import 'package:point_sale/widgets/transaction_card.dart';
 import 'package:point_sale/widgets/app_drawer.dart';
 
+
 class TransactionsView extends StatelessWidget {
   const TransactionsView({super.key});
 

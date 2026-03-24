@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_drawer.dart';
-import 'checkout_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
