@@ -1,0 +1,177 @@
+import 'package:flutter/material.dart';
+import '../models/product_model.dart';
+import 'package:point_sale/core/constants/app_color.dart';
+
+class ProductCard extends StatelessWidget {
+  final Product product;
+  final VoidCallback onAddPressed;
+  final VoidCallback onIncrement;
+  final VoidCallback onDecrement;
+
+  const ProductCard({
+    super.key,
+    required this.product,
+    required this.onAddPressed,
+    required this.onIncrement,
+    required this.onDecrement,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColor.whiteWithOpacity(0.95),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: AppColor.borderMedium,
+          width: 1.15,
+        ),
+      ),
+      child: Column(
+        children: [
+          // Emoji Icon
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 56,
+            child: Center(
+              child: Text(
+                product.emoji,
+                style: const TextStyle(
+                  fontSize: 36,
+                  height: 1.11,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          
+          // Product Name
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text(
+              product.name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Arimo',
+                fontSize: 14,
+                color: AppColor.textPrimary,
+                height: 1.43,
+              ),
+            ),
+          ),
+          const SizedBox(height: 4),
+          
+          // Price
+          Text(
+            '\$${product.price.toStringAsFixed(product.price == product.price.roundToDouble() ? 0 : 2)}',
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontFamily: 'Arimo',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: AppColor.primary,
+              height: 1.5,
+            ),
+          ),
+          const Spacer(flex: 1,),
+          // Add Button or Quantity Control
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            child: SizedBox(
+              width: double.infinity,
+              height: 36,
+              child: product.isInCart
+                  ? Container(
+                      decoration: BoxDecoration(
+                        color: AppColor.primary.withOpacity(0.75),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          // Decrement Button
+                          InkWell(
+                            onTap: onDecrement,
+                            borderRadius: BorderRadius.circular(4),
+                            child: Container(
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Icon(
+                                Icons.remove,
+                                size: 16,
+                                color: AppColor.whiteWithOpacity(0.95),
+                              ),
+                            ),
+                          ),
+                          // Quantity
+                          Text(
+                            '${product.quantity}',
+                            style: TextStyle(
+                              fontFamily: 'Arimo',
+                              fontSize: 16,
+                              color: AppColor.whiteWithOpacity(0.95),
+                              height: 1.5,
+                            ),
+                          ),
+                          // Increment Button
+                          InkWell(
+                            onTap: onIncrement,
+                            borderRadius: BorderRadius.circular(4),
+                            child: Container(
+                              width: 28,
+                              height: 28,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child:  Icon(
+                                Icons.add,
+                                size: 16,
+                                color: AppColor.whiteWithOpacity(0.95),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  : ElevatedButton(
+                      onPressed: onAddPressed,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColor.primary,
+                        foregroundColor: AppColor.whiteWithOpacity(0.95),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        elevation: 0,
+                        padding: EdgeInsets.zero,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.add,
+                            size: 16,
+                            color: AppColor.whiteWithOpacity(0.95),
+                          ),
+                          SizedBox(width: 8),
+                          Text(
+                            'Add',
+                            style: TextStyle(
+                              fontFamily: 'Arimo',
+                              fontSize: 14,
+                              height: 1.43,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
