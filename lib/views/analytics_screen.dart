@@ -76,84 +76,96 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     return Row(
       children: [
         Expanded(
-          child: ChoiceChip(
-            label: Center(child: Text('Week')),
-            selected: _selectedTimeFilter == 'Week',
-            onSelected: (selected) {
-              setState(() {
-                _selectedTimeFilter = 'Week';
-              });
-            },
-            selectedColor: AppColors.primary,
-            labelStyle: TextStyle(
-              color: _selectedTimeFilter == 'Week'
-                  ? Colors.white
-                  : Colors.grey[700],
-              fontWeight: FontWeight.w600,
-            ),
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              side: BorderSide(
+          child: SizedBox(
+            height: 50,
+            child: ChoiceChip(
+              label: Center(child: Text('Week')),
+              selected: _selectedTimeFilter == 'Week',
+              onSelected: (selected) {
+                setState(() {
+                  _selectedTimeFilter = 'Week';
+                });
+              },
+              padding: EdgeInsets.zero,
+              showCheckmark: false,
+              selectedColor: AppColors.primary,
+              labelStyle: TextStyle(
                 color: _selectedTimeFilter == 'Week'
-                    ? AppColors.primary
-                    : Colors.grey[300]!,
+                    ? Colors.white
+                    : AppColors.textSecondary,
+              ),
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+                side: BorderSide(
+                  color: _selectedTimeFilter == 'Week'
+                      ? AppColors.primary
+                      : AppColors.borderDark,
+                ),
               ),
             ),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: ChoiceChip(
-            label: Center(child: Text('Month')),
-            selected: _selectedTimeFilter == 'Month',
-            onSelected: (selected) {
-              setState(() {
-                _selectedTimeFilter = 'Month';
-              });
-            },
-            selectedColor: AppColors.primary,
-            labelStyle: TextStyle(
-              color: _selectedTimeFilter == 'Month'
-                  ? Colors.white
-                  : Colors.grey[700],
-              fontWeight: FontWeight.w600,
-            ),
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              side: BorderSide(
+          child: SizedBox(
+            height: 50,
+            child: ChoiceChip(
+              label: Center(child: Text('Month')),
+              selected: _selectedTimeFilter == 'Month',
+              onSelected: (selected) {
+                setState(() {
+                  _selectedTimeFilter = 'Month';
+                });
+              },
+              padding: EdgeInsets.zero,
+              showCheckmark: false,
+              selectedColor: AppColors.primary,
+              labelStyle: TextStyle(
                 color: _selectedTimeFilter == 'Month'
-                    ? AppColors.primary
-                    : Colors.grey[300]!,
+                    ? Colors.white
+                    : AppColors.textSecondary,
+              ),
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                side: BorderSide(
+                  color: _selectedTimeFilter == 'Month'
+                      ? AppColors.primary
+                      : AppColors.borderDark,
+                ),
               ),
             ),
           ),
         ),
         const SizedBox(width: 8),
         Expanded(
-          child: ChoiceChip(
-            label: Center(child: Text('Year')),
-            selected: _selectedTimeFilter == 'Year',
-            onSelected: (selected) {
-              setState(() {
-                _selectedTimeFilter = 'Year';
-              });
-            },
-            selectedColor: AppColors.primary,
-            labelStyle: TextStyle(
-              color: _selectedTimeFilter == 'Year'
-                  ? Colors.white
-                  : Colors.grey[700],
-              fontWeight: FontWeight.w600,
-            ),
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-              side: BorderSide(
+          child: SizedBox(
+            height: 50,
+            child: ChoiceChip(
+              label: Center(child: Text('Year')),
+              selected: _selectedTimeFilter == 'Year',
+              onSelected: (selected) {
+                setState(() {
+                  _selectedTimeFilter = 'Year';
+                });
+              },
+              padding: EdgeInsets.zero,
+              showCheckmark: false,
+              selectedColor: AppColors.primary,
+              labelStyle: TextStyle(
                 color: _selectedTimeFilter == 'Year'
-                    ? AppColors.primary
-                    : Colors.grey[300]!,
+                    ? Colors.white
+                    : AppColors.textSecondary,
+              ),
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+                side: BorderSide(
+                  color: _selectedTimeFilter == 'Year'
+                      ? AppColors.primary
+                      : AppColors.borderDark,
+                ),
               ),
             ),
           ),
@@ -172,8 +184,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       childAspectRatio: 1.5, // Adjust as needed
       children: [
         _buildSummaryCard(
-          icon: Icons.attach_money,
-          iconColor: Colors.green,
+          icon: Icons.attach_money_rounded,
+          iconColor: Colors.greenAccent.shade700,
           title: 'Total Revenue',
           value: '\$24,847',
           change: '+12.5%',
@@ -181,23 +193,23 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ),
         _buildSummaryCard(
           icon: Icons.show_chart,
-          iconColor: Colors.blueGrey,
+          iconColor: Colors.blueGrey.shade700,
           title: 'Avg Order Value',
           value: '\$109.50',
           change: '+3.1%',
           changeColor: Colors.green,
         ),
         _buildSummaryCard(
-          icon: Icons.people,
-          iconColor: Colors.orange,
+          icon: Icons.people_outlined,
+          iconColor: Colors.orangeAccent.shade700,
           title: 'Customers',
           value: '164',
           change: '+15.3%',
           changeColor: Colors.green,
         ),
         _buildSummaryCard(
-          icon: Icons.shopping_cart,
-          iconColor: Colors.blue,
+          icon: Icons.shopping_cart_outlined,
+          iconColor: Colors.blueAccent.shade700,
           title: 'Total Orders',
           value: '227',
           change: '+8.2%',
@@ -216,17 +228,26 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     required Color changeColor,
   }) {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      margin: EdgeInsets.zero,
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: AppColors.borderDark),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            CircleAvatar(
-              backgroundColor: iconColor.withOpacity(0.1),
-              child: Icon(icon, color: iconColor),
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                color: iconColor,
+              ),
+              child: Icon(icon, color: Colors.white),
             ),
             Text(
               title,
@@ -256,8 +277,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   Widget _buildSalesOverviewCard() {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: AppColors.borderDark),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -346,6 +371,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 40,
+                        interval: 1500,
                         getTitlesWidget: (value, meta) {
                           const style = TextStyle(
                             color: Colors.grey,
@@ -394,8 +420,8 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                         FlSpot(2, 3500),
                         FlSpot(3, 3800),
                         FlSpot(4, 4800),
-                        FlSpot(5, 4500),
-                        FlSpot(6, 4000),
+                        FlSpot(5, 3750),
+                        FlSpot(6, 4300),
                       ],
                       isCurved: true,
                       color: AppColors.primary, // Teal color
@@ -426,8 +452,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   Widget _buildOrdersTrendCard() {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: AppColors.borderDark),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -516,6 +546,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 40,
+                        interval: 15,
                         getTitlesWidget: (value, meta) {
                           const style = TextStyle(
                             color: Colors.grey,
@@ -558,7 +589,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       barRods: [
                         BarChartRodData(
                           toY: 25,
-                          color: Colors.green,
+                          color: Color.fromRGBO(16, 185, 129, 1),
                           width: 32,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -569,7 +600,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       barRods: [
                         BarChartRodData(
                           toY: 18,
-                          color: Colors.green,
+                          color: Color.fromRGBO(16, 185, 129, 1),
                           width: 32,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -580,7 +611,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       barRods: [
                         BarChartRodData(
                           toY: 30,
-                          color: Colors.green,
+                          color: Color.fromRGBO(16, 185, 129, 1),
                           width: 32,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -591,7 +622,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       barRods: [
                         BarChartRodData(
                           toY: 28,
-                          color: Colors.green,
+                          color: Color.fromRGBO(16, 185, 129, 1),
                           width: 32,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -602,7 +633,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       barRods: [
                         BarChartRodData(
                           toY: 45,
-                          color: Colors.green,
+                          color: Color.fromRGBO(16, 185, 129, 1),
                           width: 32,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -613,7 +644,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       barRods: [
                         BarChartRodData(
                           toY: 42,
-                          color: Colors.green,
+                          color: Color.fromRGBO(16, 185, 129, 1),
                           width: 32,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -624,7 +655,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                       barRods: [
                         BarChartRodData(
                           toY: 48,
-                          color: Colors.green,
+                          color: Color.fromRGBO(16, 185, 129, 1),
                           width: 32,
                           borderRadius: BorderRadius.circular(4),
                         ),
@@ -644,8 +675,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   Widget _buildSalesByCategoryCard() {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: AppColors.borderDark),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -683,7 +718,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: value / total,
-              backgroundColor: Colors.grey[300],
+              backgroundColor: Colors.grey.shade200,
               valueColor: AlwaysStoppedAnimation<Color>(AppColors.primary),
               minHeight: 10,
             ),
@@ -695,8 +730,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
 
   Widget _buildTopSellingProductsCard() {
     return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+      color: Colors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        side: BorderSide(color: AppColors.borderDark),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -717,9 +756,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   '156 sold',
                   '\$4,678',
                 ),
-                const Divider(),
+                const Divider(height: 1, thickness: 0.5,),
                 _buildProductListItem(2, 'Keyboard', '142 sold', '\$11,358'),
-                const Divider(),
+                const Divider(height: 1, thickness: 0.5,),
                 _buildProductListItem(3, 'Headphones', '98 sold', '\$14,700'),
               ],
             ),
@@ -739,9 +778,12 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 12,
-            backgroundColor: AppColors.primary.withOpacity(0.1),
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8)
+            ),
             child: Text(
               '$rank',
               style: TextStyle(

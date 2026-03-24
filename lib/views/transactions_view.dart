@@ -1,9 +1,12 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:point_sale/core/theme/app_colors.dart';
 import 'package:provider/provider.dart';
 import 'package:point_sale/providers/transaction_provider.dart';
 import 'package:point_sale/widgets/transaction_card.dart';
 import 'package:point_sale/widgets/app_drawer.dart';
-import 'package:point_sale/core/theme/app_colors.dart';
+
 
 class TransactionsView extends StatelessWidget {
   const TransactionsView({super.key});
@@ -13,7 +16,7 @@ class TransactionsView extends StatelessWidget {
     final provider = context.watch<TransactionProvider>();
 
     return Scaffold(
-    appBar: AppBar(
+      appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         shadowColor: Colors.black.withOpacity(0.1),
@@ -47,7 +50,11 @@ class TransactionsView extends StatelessWidget {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.file_download_outlined, color: Color(0xFF4A5565), size: 24),
+            icon: const Icon(
+              Icons.file_download_outlined,
+              color: Color(0xFF4A5565),
+              size: 24,
+            ),
             onPressed: () {
               // TODO: Implement export functionality
             },
@@ -55,11 +62,11 @@ class TransactionsView extends StatelessWidget {
         ],
       ),
       drawer: const AppDrawer(),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
               decoration: const InputDecoration(
                 hintText: 'Search transactions...',
                 prefixIcon: Icon(Icons.search),
@@ -69,37 +76,32 @@ class TransactionsView extends StatelessWidget {
               ),
               onChanged: provider.setSearchQuery,
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            SizedBox(height: 18),
+            Row(
+              spacing: 12,
               children: [
                 _buildSummaryCard(
                   context,
                   'Sales',
                   '\$${provider.totalSales.toStringAsFixed(2)}',
-                  Color.fromARGB(255, 43, 190, 141),
+                  const Color.fromRGBO(0, 212, 146, 1),
                 ),
                 _buildSummaryCard(
                   context,
                   'Refunds',
                   '\$${provider.totalRefunds.abs().toStringAsFixed(2)}',
-                  const Color.fromARGB(255, 226, 83, 0),
+                  const Color.fromRGBO(245, 73, 0, 1),
                 ),
                 _buildSummaryCard(
                   context,
                   'Expenses',
                   '\$${provider.totalExpenses.abs().toStringAsFixed(2)}',
-                  const Color.fromARGB(255, 255, 62, 48),
+                  const Color.fromRGBO(251, 44, 54, 1),
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
+            SizedBox(height: 18),
+            Row(
               children: [
                 _buildFilterChip(context, 'All', provider),
                 _buildFilterChip(context, 'Sale', provider),
@@ -107,18 +109,19 @@ class TransactionsView extends StatelessWidget {
                 _buildFilterChip(context, 'Expense', provider),
               ],
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: provider.transactions.length,
-              itemBuilder: (context, index) {
-                return TransactionCard(
-                  transaction: provider.transactions[index],
-                );
-              },
+            SizedBox(height: 20),
+            Expanded(
+              child: ListView.builder(
+                itemCount: provider.transactions.length,
+                itemBuilder: (context, index) {
+                  return TransactionCard(
+                    transaction: provider.transactions[index],
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -132,6 +135,7 @@ class TransactionsView extends StatelessWidget {
     return Expanded(
       child: Card(
         color: color,
+        margin: EdgeInsets.zero,
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -165,14 +169,27 @@ class TransactionsView extends StatelessWidget {
     final isSelected = provider.selectedFilter == label;
     return Padding(
       padding: const EdgeInsets.only(right: 8.0),
-      child: ChoiceChip(
-        label: Text(label),
-        selected: isSelected,
-        onSelected: (selected) {
-          if (selected) {
-            provider.setSelectedFilter(label);
-          }
-        },
+      child: SizedBox(
+        height: 50,
+        child: ChoiceChip(
+          showCheckmark: false,
+          label: Center(child: Text(label)),
+          selected: isSelected,
+          labelStyle: TextStyle(
+            color: isSelected ? Colors.white : AppColors.textSecondary,
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          onSelected: (selected) {
+            if (selected) {
+              provider.setSelectedFilter(label);
+            }
+          },
+          selectedColor: AppColors.primary,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(color: AppColors.borderDark),
+          ),
+        ),
       ),
     );
   }
