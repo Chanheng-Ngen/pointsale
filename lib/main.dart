@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:point_sale/providers/stock_provider.dart';
 import 'package:point_sale/providers/transaction_provider.dart';
+import 'package:point_sale/providers/order_provider.dart';
+import 'package:point_sale/providers/product_inventory_provider.dart';
 import 'package:point_sale/routes/app_routes.dart';
 import 'package:provider/provider.dart';
 import 'package:point_sale/providers/cart_provider.dart';
@@ -12,6 +14,8 @@ void main() {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => StockProvider()),
         ChangeNotifierProvider(create: (_) => TransactionProvider()),
+        ChangeNotifierProvider(create: (_) => OrderProvider()),
+        ChangeNotifierProvider(create: (_) => ProductInventoryProvider()),
       ],
       child: const MyApp(),
     ),
