@@ -30,7 +30,7 @@ class HomeScreen extends StatelessWidget {
                   bottomRight: Radius.circular(24),
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              padding: const EdgeInsets.fromLTRB(16, 42, 16, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
