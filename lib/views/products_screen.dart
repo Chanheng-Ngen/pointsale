@@ -5,8 +5,8 @@ import 'package:point_sale/widgets/app_drawer.dart';
 import 'package:point_sale/widgets/product_list_card.dart';
 import 'package:point_sale/widgets/product_form_dialog.dart';
 
-class ProductsView extends StatelessWidget {
-  const ProductsView({super.key});
+class ProductsScreen extends StatelessWidget {
+  const ProductsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -6,8 +6,8 @@ import 'package:point_sale/widgets/order_card.dart';
 import 'package:point_sale/widgets/order_details_modal.dart';
 import 'package:point_sale/widgets/app_drawer.dart';
 
-class OrdersView extends StatelessWidget {
-  const OrdersView({super.key});
+class OrdersScreen extends StatelessWidget {
+  const OrdersScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
