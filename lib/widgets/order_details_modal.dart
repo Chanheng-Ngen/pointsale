@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:point_sale/models/order.dart';
+import 'package:point_sale/providers/order_provider.dart';
 
 class OrderDetailsModal extends StatelessWidget {
   final OrderModel order;
@@ -102,7 +104,23 @@ class OrderDetailsModal extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Items', style: TextStyle(color: Colors.grey)),
-                    Text('${order.itemCount} products', style: const TextStyle(fontWeight: FontWeight.w500)),
+                    GestureDetector(
+                      onTap: () => _showProductsModal(context, order),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE6F8FB),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          children: [
+                            Text('${order.itemCount} products', style: const TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF00B8D0))),
+                            const SizedBox(width: 4),
+                            const Icon(Icons.more_vert, color: Color(0xFF00B8D0), size: 18),
+                          ],
+                        ),
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 12),
@@ -136,6 +154,27 @@ class OrderDetailsModal extends StatelessWidget {
           ),
           
           const SizedBox(height: 24),
+          
+          // Make as Paid button (only for pending)
+          if (order.status.toLowerCase() == 'pending') ...[
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton(
+                onPressed: () {
+                  final provider = Provider.of<OrderProvider>(context, listen: false);
+                  provider.updateOrderStatus(order.id, 'completed');
+                  Navigator.of(context).pop();
+                },
+                style: OutlinedButton.styleFrom(
+                  side: const BorderSide(color: Color(0xFF00B8D0)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                ),
+                child: const Text('Make as Paid', style: TextStyle(color: Color(0xFF00B8D0), fontSize: 16, fontWeight: FontWeight.w500)),
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
           
           // Close button full width Cyan
           SizedBox(
@@ -197,6 +236,97 @@ class OrderDetailsModal extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  void _showProductsModal(BuildContext context, OrderModel order) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          backgroundColor: Colors.white,
+          child: Container(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('Products', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, fontFamily: 'Arimo')),
+                    IconButton(
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      icon: const Icon(Icons.close, color: Colors.grey),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.5),
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: order.itemCount > 0 ? order.itemCount : 1,
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      return Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40,
+                              height: 40,
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(Icons.mouse, color: Colors.grey),
+                            ),
+                            const SizedBox(width: 12),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Wireless Mouse', style: TextStyle(fontWeight: FontWeight.w500)),
+                                  Text('\$29.99', style: TextStyle(color: Colors.grey, fontSize: 13)),
+                                ],
+                              ),
+                            ),
+                            const Text('1', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                            const SizedBox(width: 24),
+                            const Text('\$29.99', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF00B8D0),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      elevation: 0,
+                    ),
+                    child: const Text('Close', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

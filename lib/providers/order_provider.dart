@@ -101,4 +101,22 @@ class OrderProvider extends ChangeNotifier {
     _selectedFilter = filter;
     notifyListeners();
   }
+
+  void updateOrderStatus(String orderId, String newStatus) {
+    final index = _orders.indexWhere((o) => o.id == orderId);
+    if (index != -1) {
+      final order = _orders[index];
+      _orders[index] = OrderModel(
+        id: order.id,
+        customerName: order.customerName,
+        status: newStatus,
+        itemCount: order.itemCount,
+        time: order.time,
+        subtotal: order.subtotal,
+        tax: order.tax,
+        total: order.total,
+      );
+      notifyListeners();
+    }
+  }
 }

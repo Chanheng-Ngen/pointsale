@@ -19,6 +19,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   late TextEditingController _skuController;
   late TextEditingController _priceController;
   late TextEditingController _stockController;
+  bool _isCreatingNewCategory = false;
 
   @override
   void initState() {
@@ -135,83 +136,156 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 // Category
                 _buildLabel('Category *'),
                 const SizedBox(height: 8),
-                LayoutBuilder(
-                  builder: (context, constraints) => Autocomplete<String>(
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      final provider = Provider.of<ProductInventoryProvider>(context, listen: false);
-                      final existingCategories = provider.products.map((p) => p.category).toSet().toList()..sort();
-                      if (textEditingValue.text.isEmpty) {
-                        return existingCategories;
-                      }
-                      return existingCategories.where((cat) => cat.toLowerCase().contains(textEditingValue.text.toLowerCase()));
-                    },
-                    onSelected: (String selection) {
-                      _categoryController.text = selection;
-                    },
-                    fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                      // Keep controllers in sync
-                      controller.addListener(() {
-                        if (controller.text != _categoryController.text) {
-                          _categoryController.text = controller.text;
-                        }
-                      });
-                      if (_categoryController.text.isNotEmpty && controller.text.isEmpty) {
-                        controller.text = _categoryController.text;
-                      }
-                      return TextFormField(
-                        controller: controller,
-                        focusNode: focusNode,
-                        onFieldSubmitted: (String value) => onFieldSubmitted(),
-                        decoration: InputDecoration(
-                          hintText: 'Select a category',
-                          hintStyle: TextStyle(color: Colors.black.withOpacity(0.5), fontSize: 16),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
-                          suffixIcon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF9CA3AF)),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(color: Color(0xFF00B8DB), width: 1.15),
-                          ),
-                        ),
-                        validator: (val) => val == null || val.isEmpty ? 'Required' : null,
-                      );
-                    },
-                    optionsViewBuilder: (context, onSelected, options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 4.0,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(maxHeight: 200, maxWidth: constraints.maxWidth),
-                            child: ListView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              itemCount: options.length,
-                              itemBuilder: (context, index) {
-                                final option = options.elementAt(index);
-                                return InkWell(
-                                  onTap: () => onSelected(option),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-                                    child: Text(option, style: TextStyle(fontSize: 16, color: Colors.black.withOpacity(0.8))),
-                                  ),
-                                );
-                              },
+                if (_isCreatingNewCategory) ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextFormField(
+                          controller: _categoryController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter category name',
+                            hintStyle: TextStyle(color: Colors.black.withOpacity(0.5), fontSize: 16),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFF00B8DB), width: 1.15),
                             ),
                           ),
+                          validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                         ),
-                      );
-                    },
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_categoryController.text.isNotEmpty) {
+                            setState(() {
+                              _isCreatingNewCategory = false;
+                            });
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00B8DB),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 0,
+                        ),
+                        child: const Text('Create', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal)),
+                      ),
+                    ],
                   ),
-                ),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _categoryController.clear();
+                        _isCreatingNewCategory = false;
+                      });
+                    },
+                    child: const Text(
+                      '< Back to existing categories',
+                      style: TextStyle(color: Color(0xFF2563EB), fontSize: 14),
+                    ),
+                  ),
+                ] else ...[
+                  LayoutBuilder(
+                    builder: (context, constraints) => Autocomplete<String>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        final provider = Provider.of<ProductInventoryProvider>(context, listen: false);
+                        final existingCategories = provider.products.map((p) => p.category).toSet().toList()..sort();
+                        if (textEditingValue.text.isEmpty) {
+                          return existingCategories;
+                        }
+                        return existingCategories.where((cat) => cat.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                      },
+                      onSelected: (String selection) {
+                        _categoryController.text = selection;
+                      },
+                      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                        // Keep controllers in sync
+                        controller.addListener(() {
+                          if (controller.text != _categoryController.text) {
+                            _categoryController.text = controller.text;
+                          }
+                        });
+                        if (_categoryController.text.isNotEmpty && controller.text.isEmpty) {
+                          controller.text = _categoryController.text;
+                        }
+                        return TextFormField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          onFieldSubmitted: (String value) => onFieldSubmitted(),
+                          decoration: InputDecoration(
+                            hintText: 'Select a category',
+                            hintStyle: TextStyle(color: Colors.black.withOpacity(0.5), fontSize: 16),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                            suffixIcon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF9CA3AF)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFF00B8DB), width: 1.15),
+                            ),
+                          ),
+                          validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                        );
+                      },
+                      optionsViewBuilder: (context, onSelected, options) {
+                        return Align(
+                          alignment: Alignment.topLeft,
+                          child: Material(
+                            elevation: 4.0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(maxHeight: 200, maxWidth: constraints.maxWidth),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (context, index) {
+                                  final option = options.elementAt(index);
+                                  return InkWell(
+                                    onTap: () => onSelected(option),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+                                      child: Text(option, style: TextStyle(fontSize: 16, color: Colors.black.withOpacity(0.8))),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _categoryController.clear();
+                        _isCreatingNewCategory = true;
+                      });
+                    },
+                    child: const Text(
+                      'Go to create new a category >',
+                      style: TextStyle(color: Color(0xFF2563EB), fontSize: 14),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 16),
 
                 // SKU
