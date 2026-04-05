@@ -5,8 +5,8 @@ import 'package:point_sale/widgets/app_drawer.dart';
 import 'package:point_sale/widgets/product_list_card.dart';
 import 'package:point_sale/widgets/product_form_dialog.dart';
 
-class ProductsView extends StatelessWidget {
-  const ProductsView({super.key});
+class ProductsScreen extends StatelessWidget {
+  const ProductsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -155,44 +155,46 @@ class ProductsView extends StatelessWidget {
               ),
 
               // Categories Horizontal List
-              SizedBox(
-                height: 48,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: provider.categoriesWithCounts.length,
-                  itemBuilder: (context, index) {
-                    final cat = provider.categoriesWithCounts[index];
-                    return Container(
-                      margin: const EdgeInsets.only(right: 8),
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade200),
-                      ),
-                      child: Row(
-                        children: [
-                          Text(
-                            cat['name'],
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: Color(0xFF374151),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  height: 48,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: provider.categoriesWithCounts.length,
+                    itemBuilder: (context, index) {
+                      final cat = provider.categoriesWithCounts[index];
+                      return Container(
+                        margin: const EdgeInsets.only(right: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Row(
+                          children: [
+                            Text(
+                              cat['name'],
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w500,
+                                color: Color(0xFF374151),
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            '(${cat['count']})',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.grey.shade500,
+                            const SizedBox(width: 6),
+                            Text(
+                              '(${cat['count']})',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade500,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                          ],
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
 

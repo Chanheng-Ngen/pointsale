@@ -19,8 +19,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   late TextEditingController _skuController;
   late TextEditingController _priceController;
   late TextEditingController _stockController;
-  
-  bool _isCreatingCategory = false;
+  bool _isCreatingNewCategory = false;
 
   @override
   void initState() {
@@ -111,14 +110,14 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                       widget.productToEdit == null ? 'Add New Product' : 'Edit Product',
                       style: const TextStyle(
                         fontFamily: 'Arimo',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF111827),
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xFF0A0A0A),
                       ),
                     ),
                     InkWell(
                       onTap: () => Navigator.of(context).pop(),
-                      child: const Icon(Icons.close, size: 20, color: Color(0xFF4B5563)),
+                      child: const Icon(Icons.close, size: 22, color: Color(0xFF0A0A0A)),
                     ),
                   ],
                 ),
@@ -129,7 +128,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 const SizedBox(height: 8),
                 _buildTextField(
                   controller: _nameController,
-                  hint: '',
+                  hint: 'Enter product name',
                   validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                 ),
                 const SizedBox(height: 16),
@@ -137,76 +136,154 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                 // Category
                 _buildLabel('Category *'),
                 const SizedBox(height: 8),
-                if (_isCreatingCategory) ...[
+                if (_isCreatingNewCategory) ...[
                   Row(
                     children: [
                       Expanded(
-                        child: _buildTextField(
+                        child: TextFormField(
                           controller: _categoryController,
-                          hint: 'New category name',
+                          decoration: InputDecoration(
+                            hintText: 'Enter category name',
+                            hintStyle: TextStyle(color: Colors.black.withOpacity(0.5), fontSize: 16),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFF00B8DB), width: 1.15),
+                            ),
+                          ),
                           validator: (val) => val == null || val.isEmpty ? 'Required' : null,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      SizedBox(
-                        height: 48,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00B8D0), // Cyan Primary
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            elevation: 0,
-                          ),
-                          onPressed: () {
-                            // Validating and creating it would visually just keep it in the textfield
-                            // We can just switch back the view.
-                            if (_categoryController.text.isNotEmpty) {
-                              setState(() {
-                                _isCreatingCategory = false;
-                              });
-                            }
-                          },
-                          child: const Text('Create', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (_categoryController.text.isNotEmpty) {
+                            setState(() {
+                              _isCreatingNewCategory = false;
+                            });
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF00B8DB),
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          elevation: 0,
                         ),
+                        child: const Text('Create', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal)),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () => setState(() => _isCreatingCategory = false),
-                    child: const Text('< Back to existing categories', style: TextStyle(color: Color(0xFF3B82F6), fontSize: 13)),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _categoryController.clear();
+                        _isCreatingNewCategory = false;
+                      });
+                    },
+                    child: const Text(
+                      '< Back to existing categories',
+                      style: TextStyle(color: Color(0xFF2563EB), fontSize: 14),
+                    ),
                   ),
                 ] else ...[
-                  // If picking existing category... Let's just use a normal text field or dropdown. 
-                  // The prompt image shows a textfield with placeholder "Toy" and a Create button next to it. 
-                  // We'll mimic the picture strictly: 
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildTextField(
-                          controller: _categoryController,
-                          hint: 'Toy',
-                          validator: (val) => val == null || val.isEmpty ? 'Required' : null,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      SizedBox(
-                        height: 48,
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF00B8D0),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                            elevation: 0,
+                  LayoutBuilder(
+                    builder: (context, constraints) => Autocomplete<String>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        final provider = Provider.of<ProductInventoryProvider>(context, listen: false);
+                        final existingCategories = provider.products.map((p) => p.category).toSet().toList()..sort();
+                        if (textEditingValue.text.isEmpty) {
+                          return existingCategories;
+                        }
+                        return existingCategories.where((cat) => cat.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                      },
+                      onSelected: (String selection) {
+                        _categoryController.text = selection;
+                      },
+                      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+                        // Keep controllers in sync
+                        controller.addListener(() {
+                          if (controller.text != _categoryController.text) {
+                            _categoryController.text = controller.text;
+                          }
+                        });
+                        if (_categoryController.text.isNotEmpty && controller.text.isEmpty) {
+                          controller.text = _categoryController.text;
+                        }
+                        return TextFormField(
+                          controller: controller,
+                          focusNode: focusNode,
+                          onFieldSubmitted: (String value) => onFieldSubmitted(),
+                          decoration: InputDecoration(
+                            hintText: 'Select a category',
+                            hintStyle: TextStyle(color: Colors.black.withOpacity(0.5), fontSize: 16),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
+                            suffixIcon: const Icon(Icons.keyboard_arrow_down, color: Color(0xFF9CA3AF)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFF00B8DB), width: 1.15),
+                            ),
                           ),
-                          onPressed: () {},
-                          child: const Text('Create', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
-                        ),
-                      ),
-                    ],
+                          validator: (val) => val == null || val.isEmpty ? 'Required' : null,
+                        );
+                      },
+                      optionsViewBuilder: (context, onSelected, options) {
+                        return Align(
+                          alignment: Alignment.topLeft,
+                          child: Material(
+                            elevation: 4.0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(maxHeight: 200, maxWidth: constraints.maxWidth),
+                              child: ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (context, index) {
+                                  final option = options.elementAt(index);
+                                  return InkWell(
+                                    onTap: () => onSelected(option),
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+                                      child: Text(option, style: TextStyle(fontSize: 16, color: Colors.black.withOpacity(0.8))),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: () {},
-                    child: const Text('< Back to existing categories', style: TextStyle(color: Color(0xFF3B82F6), fontSize: 13)),
+                  const SizedBox(height: 12),
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        _categoryController.clear();
+                        _isCreatingNewCategory = true;
+                      });
+                    },
+                    child: const Text(
+                      'Go to create new a category >',
+                      style: TextStyle(color: Color(0xFF2563EB), fontSize: 14),
+                    ),
                   ),
                 ],
                 const SizedBox(height: 16),
@@ -266,10 +343,10 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                         onPressed: () => Navigator.of(context).pop(),
                         style: OutlinedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          side: BorderSide(color: Colors.grey.shade300),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          side: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
-                        child: const Text('Cancel', style: TextStyle(color: Color(0xFF374151), fontWeight: FontWeight.w500)),
+                        child: const Text('Cancel', style: TextStyle(color: Color(0xFF0A0A0A), fontSize: 16, fontWeight: FontWeight.normal)),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -277,12 +354,12 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                       child: ElevatedButton(
                         onPressed: _saveProduct,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF00B8D0),
+                          backgroundColor: const Color(0xFF00B8DB),
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           elevation: 0,
                         ),
-                        child: Text(widget.productToEdit == null ? 'Add Product' : 'Save Changes', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+                        child: Text(widget.productToEdit == null ? 'Add Product' : 'Save Changes', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal)),
                       ),
                     ),
                   ],
@@ -299,9 +376,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     return Text(
       text,
       style: const TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        color: Color(0xFF4B5563),
+        fontSize: 14,
+        fontWeight: FontWeight.normal,
+        color: Color(0xFF364153),
       ),
     );
   }
@@ -318,19 +395,19 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        hintStyle: TextStyle(color: Colors.black.withOpacity(0.5), fontSize: 16),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 11),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: BorderSide(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFFD1D5DC), width: 1.15),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: Color(0xFF00B8D0)),
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: Color(0xFF00B8DB), width: 1.15),
         ),
       ),
     );

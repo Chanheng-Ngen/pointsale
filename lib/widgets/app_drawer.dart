@@ -202,7 +202,7 @@ class AppDrawer extends StatelessWidget {
                 _buildMenuItem(
                   icon: Icons.info,
                   label: 'About Us',
-                  isActive: currentRoute == '/about',
+                  isActive: false, // User requested same style as Settings, effectively disabling the active state highlight
                   onTap: () {
                     Navigator.pushNamed(context, '/about');
                   },

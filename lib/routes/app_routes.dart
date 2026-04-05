@@ -5,11 +5,11 @@ import 'package:point_sale/views/auth/sign_up_screen.dart';
 import 'package:point_sale/views/checkout_screen.dart';
 import 'package:point_sale/views/home_screen.dart';
 
-import 'package:point_sale/views/about_us_view.dart';
+import 'package:point_sale/views/about_us_screen.dart';
 import 'package:point_sale/views/stock_management.dart';
-import 'package:point_sale/views/products_view.dart';
+import 'package:point_sale/views/products_screen.dart';
 import 'package:point_sale/views/transactions_view.dart';
-import 'package:point_sale/views/orders_view.dart';
+import 'package:point_sale/views/orders_screen.dart';
 import 'package:point_sale/views/analytics_screen.dart';
 
 class AppRoutes {
@@ -33,10 +33,10 @@ class AppRoutes {
     home: (context ) => const HomeScreen(),
     checkout: (context) => const CheckoutScreen(),
     stockmanagement: (context) => const StockManagementView(),
-    about: (context) => const AboutUsView(),
-    products: (context) => const ProductsView(),
+    about: (context) => const AboutUsScreen(),
+    products: (context) => const ProductsScreen(),
     transactions: (context) => const TransactionsView(),
-    orders: (context) => const OrdersView(),
+    orders: (context) => const OrdersScreen(),
     analytics: (context) => const AnalyticsScreen(),
   };
 }
