@@ -43,16 +43,6 @@ class OrderProvider extends ChangeNotifier {
       tax: 27.27,
       total: 299.99,
     ),
-    OrderModel(
-      id: 'ORD-1005',
-      customerName: 'Charlie Davis',
-      status: 'cancelled',
-      itemCount: 4,
-      time: '02:30 PM',
-      subtotal: 163.60,
-      tax: 16.36,
-      total: 179.96,
-    ),
   ];
 
   String _searchQuery = '';
