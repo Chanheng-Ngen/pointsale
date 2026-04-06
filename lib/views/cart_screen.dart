@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/cart_item_card.dart';
+import '../widgets/customer_information_modal.dart';
 import '../widgets/payment_method_modal.dart';
 
 class CartScreen extends StatelessWidget {
@@ -353,10 +354,29 @@ class CartScreen extends StatelessWidget {
                           child: OutlinedButton.icon(
                             onPressed: cart.isEmpty
                                 ? null
-                                : () {
-                                    // Save for later - clear cart and show toast
-                                    cart.clearCart();
-                                    showSuccessToast(context, 'Order saved! Pay later from Orders screen');
+                                : () async {
+                                    final customerInfo = await showDialog<Map<String, String>>(
+                                      context: context,
+                                      barrierDismissible: true,
+                                      builder: (BuildContext context) {
+                                        return const CustomerInformationModal();
+                                      },
+                                    );
+
+                                    if (customerInfo != null && context.mounted) {
+                                      final nickname = customerInfo['nickname'];
+                                      if (nickname != null && nickname.isNotEmpty) {
+                                        showSuccessToast(
+                                          context,
+                                          'Customer info added for $nickname',
+                                        );
+                                      } else {
+                                        showSuccessToast(
+                                          context,
+                                          'Customer information added',
+                                        );
+                                      }
+                                    }
                                   },
                             style: OutlinedButton.styleFrom(
                               backgroundColor: const Color(0xFFF3F4F6),
@@ -369,9 +389,9 @@ class CartScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(14),
                               ),
                             ),
-                            icon: const Icon(Icons.schedule, size: 20),
+                            icon: const Icon(Icons.info_outline, size: 20),
                             label: const Text(
-                              'Save for Later',
+                              'Customer Information',
                               style: TextStyle(
                                 fontFamily: 'Arimo',
                                 fontSize: 16,
