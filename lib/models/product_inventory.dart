@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class ProductInventory {
   final String id;
   final String name;

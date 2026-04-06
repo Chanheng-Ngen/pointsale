@@ -69,9 +69,9 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
               children: [
                 // Credit/Debit Card
                 _buildPaymentOption(
-                  icon: Icons.credit_card,
-                  label: 'Credit/Debit Card',
-                  value: 'Credit/Debit Card',
+                  icon: Icons.qr_code,
+                  label: 'KHQR Code',
+                  value: 'KHQR Code',
                 ),
                 const SizedBox(height: 12),
                 // Cash
@@ -79,13 +79,6 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                   icon: Icons.money,
                   label: 'Cash',
                   value: 'Cash',
-                ),
-                const SizedBox(height: 12),
-                // Digital Wallet
-                _buildPaymentOption(
-                  icon: Icons.account_balance_wallet,
-                  label: 'Digital Wallet',
-                  value: 'Digital Wallet',
                 ),
               ],
             ),

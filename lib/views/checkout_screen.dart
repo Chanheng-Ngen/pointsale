@@ -17,12 +17,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _searchController = TextEditingController();
 
   final List<Product> products = [
-    Product(
-      id: '1',
-      name: 'Wireless Mouse',
-      emoji: '🖱️',
-      price: 29.99,
-    ),
+    Product(id: '1',name: 'Wireless Mouse',emoji: '🖱️',price: 29.99,),
     Product(id: '2', name: 'USB Cable', emoji: '🔌', price: 9.9),
     Product(id: '3', name: 'Keyboard', emoji: '⌨️', price: 79.99),
     Product(id: '4', name: 'Monitor', emoji: '🖥️', price: 299.99),
