@@ -93,7 +93,7 @@ class OrderDetailsModal extends StatelessWidget {
           
           // Cost Summary wrapped in grey container
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(6.00),
             decoration: BoxDecoration(
               color: const Color(0xFFF9FAFB),
               borderRadius: BorderRadius.circular(12),
@@ -244,85 +244,97 @@ class OrderDetailsModal extends StatelessWidget {
       context: context,
       builder: (context) {
         return Dialog(
+          insetPadding: EdgeInsets.symmetric(horizontal: 12.00),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           backgroundColor: Colors.white,
-          child: Container(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('Products', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, fontFamily: 'Arimo')),
-                    IconButton(
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                      icon: const Icon(Icons.close, color: Colors.grey),
+          child: SizedBox(
+            width: MediaQuery.of(context).size.width,
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('Products', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600, fontFamily: 'Arimo')),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: const Icon(Icons.close, color: Colors.grey),
+                        onPressed: () => Navigator.of(context).pop(),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      itemCount: order.itemCount > 0 ? order.itemCount : 1,
+                      separatorBuilder: (context, index) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade100,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.mouse, color: Colors.grey),
+                              ),
+                              const SizedBox(width: 12),
+                              const Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Wireless Mouse', style: TextStyle(fontWeight: FontWeight.w500)),
+                                    Row(
+                                      children: [
+                                        Text('\$29.99', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 6.0),
+                                          child: Icon(Icons.close, size: 12,),
+                                        ),
+                                        Text('5', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 24),
+                              const Text('\$149.95', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: ElevatedButton(
                       onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF00B8D0),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                        elevation: 0,
+                      ),
+                      child: const Text('Close', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.5),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    itemCount: order.itemCount > 0 ? order.itemCount : 1,
-                    separatorBuilder: (context, index) => const SizedBox(height: 12),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 40,
-                              height: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.mouse, color: Colors.grey),
-                            ),
-                            const SizedBox(width: 12),
-                            const Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Wireless Mouse', style: TextStyle(fontWeight: FontWeight.w500)),
-                                  Text('\$29.99', style: TextStyle(color: Colors.grey, fontSize: 13)),
-                                ],
-                              ),
-                            ),
-                            const Text('1', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                            const SizedBox(width: 24),
-                            const Text('\$29.99', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                          ],
-                        ),
-                      );
-                    },
                   ),
-                ),
-                const SizedBox(height: 24),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF00B8D0),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                      elevation: 0,
-                    ),
-                    child: const Text('Close', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w500)),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );

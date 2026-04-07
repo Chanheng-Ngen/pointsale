@@ -105,7 +105,6 @@ class OrderCard extends StatelessWidget {
         fg = const Color(0xFFF97316);
         icon = Icons.access_time;
         break;
-      case 'cancelled':
       default:
         bg = const Color(0xFFFEE2E2);
         fg = const Color(0xFFEF4444);
