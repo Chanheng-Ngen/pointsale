@@ -12,7 +12,8 @@ class ApiConstants {
 
     return 'http://127.0.0.1:8000/api';
   }
-  static String get   register => '$baseUrl/auth/register';
+  static String get register => '$baseUrl/auth/register';
   static String get login => '$baseUrl/auth/login';
   static String get logout => '$baseUrl/auth/logout';
+  static String get user => '$baseUrl/auth/me';
 }

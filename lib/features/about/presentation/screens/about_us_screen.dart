@@ -41,7 +41,7 @@ class AboutUsScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

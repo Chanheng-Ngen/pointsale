@@ -46,7 +46,7 @@ class OrdersScreen extends StatelessWidget {
         ),
         centerTitle: true,
       ),
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(),
       body: Container(
         color: const Color(0xFFF9FAFB),
         child: Padding(

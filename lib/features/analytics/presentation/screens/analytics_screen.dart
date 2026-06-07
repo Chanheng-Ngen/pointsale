@@ -49,7 +49,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         ),
         centerTitle: true,
       ),
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(

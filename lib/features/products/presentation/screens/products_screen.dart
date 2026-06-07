@@ -63,7 +63,7 @@ class ProductsScreen extends StatelessWidget {
           ),
         ],
       ),
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(),
       body: Consumer<ProductInventoryProvider>(
         builder: (context, provider, child) {
           return Column(

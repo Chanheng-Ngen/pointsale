@@ -8,7 +8,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,12 +30,14 @@ class HomeScreen extends StatelessWidget {
                   bottomRight: Radius.circular(24),
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(16, 42, 16, 0),
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Top bar with menu and title
+                  const SizedBox(height: 10),
                   Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Builder(
                         builder: (context) => Container(
@@ -71,9 +73,8 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ),
                     ],
-                    
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 10),
                   
                   // Today's Sales Card
                   Container(

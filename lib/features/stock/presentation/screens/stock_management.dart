@@ -19,7 +19,7 @@ class StockManagementView extends StatelessWidget {
     final stock = context.watch<StockProvider>();
 
     return Scaffold(
-      drawer: const AppDrawer(),
+      drawer: AppDrawer(),
       backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.white,

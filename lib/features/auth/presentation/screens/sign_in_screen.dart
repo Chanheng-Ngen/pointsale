@@ -50,6 +50,7 @@ class _SignInScreenState extends State<SignInScreen> {
     });
 
     final result = await _authService.login(email: email, password: password);
+    
 
     if (!mounted) {
       return;

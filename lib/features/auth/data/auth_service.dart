@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:point_sale/core/constants/api_constants.dart';
 import 'package:http/http.dart' as http;
+import 'package:point_sale/core/services/user_session.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 
@@ -14,6 +15,7 @@ class AuthService {
   static String get _registerUrl => ApiConstants.register;
   static String get _loginUrl => ApiConstants.login;
   static String get _logoutUrl => ApiConstants.logout;
+  static String get _userUrl => ApiConstants.user;
 
   Future<void> restoreSession() async {
     final prefs = await SharedPreferences.getInstance();
@@ -111,6 +113,8 @@ class AuthService {
           await _saveToken(_authToken!);
         }
 
+        UserSession.instance.user = jsonBody['data'] as Map<String, dynamic>?;
+
         return LoginResult(
           success: true,
           message: _extractSuccessMessage(jsonBody) ?? 'Login successful.',
@@ -158,6 +162,7 @@ class AuthService {
           : <String, dynamic>{};
 
       if (response.statusCode == 200 || response.statusCode == 204) {
+        UserSession.instance.clear();
         await _clearToken();
         return LogoutResult(
           success: true,

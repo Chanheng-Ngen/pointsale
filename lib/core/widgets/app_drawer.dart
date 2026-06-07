@@ -1,15 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:point_sale/core/constants/app_color.dart';
 import 'package:point_sale/app/app_routes.dart';
+import 'package:point_sale/core/services/user_session.dart';
 import 'package:point_sale/features/auth/data/auth_service.dart';
-class AppDrawer extends StatelessWidget {
-  const AppDrawer({super.key});
+
+class AppDrawer extends StatefulWidget {
+  AppDrawer({super.key});
+
+  @override
+  State<AppDrawer> createState() => _AppDrawerState();
+}
+
+class _AppDrawerState extends State<AppDrawer> {
+  final _authService = AuthService();
+  late Future<Map<String, dynamic>> _userFuture;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     // Get the current route
     final currentRoute = ModalRoute.of(context)?.settings.name ?? '/';
-    
+    final user = UserSession.instance.user;
+
     return Drawer(
       child: Column(
         children: [
@@ -21,10 +37,7 @@ class AppDrawer extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.centerLeft,
                 end: Alignment.centerRight,
-                colors: [
-                  AppColor.textSecondary,
-                  AppColor.primary,
-                ],
+                colors: [AppColor.textSecondary, AppColor.primary],
               ),
             ),
             child: SafeArea(
@@ -61,7 +74,7 @@ class AppDrawer extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // User Profile Card
                   Container(
                     padding: const EdgeInsets.all(12),
@@ -90,7 +103,7 @@ class AppDrawer extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Admin User',
+                                '${user != null ? user['name'] ?? 'User' : 'User'}',
                                 style: TextStyle(
                                   fontFamily: 'Arimo',
                                   fontSize: 16,
@@ -99,7 +112,7 @@ class AppDrawer extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                'admin@pos.com',
+                                '${user != null ? user['email'] ?? 'Email' : 'Email'}',
                                 style: TextStyle(
                                   fontFamily: 'Arimo',
                                   fontSize: 14,
@@ -117,7 +130,7 @@ class AppDrawer extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Navigation Section
           Expanded(
             child: ListView(
@@ -204,7 +217,8 @@ class AppDrawer extends StatelessWidget {
                 _buildMenuItem(
                   icon: Icons.info,
                   label: 'About Us',
-                  isActive: false, // User requested same style as Settings, effectively disabling the active state highlight
+                  isActive:
+                      false, // User requested same style as Settings, effectively disabling the active state highlight
                   onTap: () {
                     Navigator.pushNamed(context, '/about');
                   },
@@ -212,7 +226,7 @@ class AppDrawer extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Sign Out Button
           Container(
             decoration: BoxDecoration(
@@ -235,7 +249,9 @@ class AppDrawer extends StatelessWidget {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(result.message),
-                    backgroundColor: result.success ? const Color(0xFF00D492) : AppColor.error,
+                    backgroundColor: result.success
+                        ? const Color(0xFF00D492)
+                        : AppColor.error,
                   ),
                 );
 
@@ -249,14 +265,13 @@ class AppDrawer extends StatelessWidget {
               },
               borderRadius: BorderRadius.circular(14),
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
-                    const Icon(
-                      Icons.logout,
-                      color: AppColor.error,
-                      size: 20,
-                    ),
+                    const Icon(Icons.logout, color: AppColor.error, size: 20),
                     const SizedBox(width: 12),
                     const Text(
                       'Sign Out',
@@ -286,17 +301,15 @@ class AppDrawer extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: 4),
       decoration: BoxDecoration(
-        color: isActive ? AppColor.primary.withOpacity(0.16) : Colors.transparent,
+        color: isActive
+            ? AppColor.primary.withOpacity(0.16)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(14),
       ),
       child: ListTile(
         dense: true,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        leading: Icon(
-          icon,
-          size: 20,
-          color: AppColor.textSecondary,
-        ),
+        leading: Icon(icon, size: 20, color: AppColor.textSecondary),
         title: Text(
           label,
           style: const TextStyle(
