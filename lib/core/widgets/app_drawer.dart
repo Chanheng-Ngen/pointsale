@@ -4,21 +4,8 @@ import 'package:point_sale/app/app_routes.dart';
 import 'package:point_sale/core/services/user_session.dart';
 import 'package:point_sale/features/auth/data/auth_service.dart';
 
-class AppDrawer extends StatefulWidget {
-  AppDrawer({super.key});
-
-  @override
-  State<AppDrawer> createState() => _AppDrawerState();
-}
-
-class _AppDrawerState extends State<AppDrawer> {
-  final _authService = AuthService();
-  late Future<Map<String, dynamic>> _userFuture;
-
-  @override
-  void initState() {
-    super.initState();
-  }
+class AppDrawer extends StatelessWidget {
+  const AppDrawer({super.key});
 
   @override
   Widget build(BuildContext context) {
