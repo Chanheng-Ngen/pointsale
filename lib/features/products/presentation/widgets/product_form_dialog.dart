@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:point_sale/features/products/data/models/category_model.dart';
 import 'package:provider/provider.dart';
 import 'package:point_sale/features/products/data/models/product_inventory.dart';
 import 'package:point_sale/features/products/providers/product_inventory_provider.dart';
@@ -19,16 +20,23 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   late TextEditingController _skuController;
   late TextEditingController _priceController;
   late TextEditingController _stockController;
+  late TextEditingController _minStockController;
+  late TextEditingController _maxStockController;
   bool _isCreatingNewCategory = false;
+  bool _isSaving = false;
+  Category? _selectedCategory;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.productToEdit?.name ?? '');
-    _categoryController = TextEditingController(text: widget.productToEdit?.category ?? '');
-    _skuController = TextEditingController(text: widget.productToEdit?.sku ?? '');
+    _categoryController = TextEditingController(text: widget.productToEdit?.category?.name ?? '');
+    _skuController = TextEditingController(text: widget.productToEdit?.skuCode ?? '');
     _priceController = TextEditingController(text: widget.productToEdit != null ? widget.productToEdit!.price.toString() : '');
-    _stockController = TextEditingController(text: widget.productToEdit != null ? widget.productToEdit!.stock.toString() : '');
+    _stockController = TextEditingController(text: widget.productToEdit != null ? widget.productToEdit!.quantity.toString() : '');
+    _minStockController = TextEditingController(text: widget.productToEdit?.minStock.toString() ?? '');
+    _maxStockController = TextEditingController(text: widget.productToEdit?.maxStock.toString() ?? '');
+    _selectedCategory = widget.productToEdit?.category;
   }
 
   @override
@@ -38,51 +46,88 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     _skuController.dispose();
     _priceController.dispose();
     _stockController.dispose();
+    _minStockController.dispose();
+    _maxStockController.dispose();
     super.dispose();
   }
 
-  void _saveProduct() {
+  Future<void> _createCategory() async {
+    final name = _categoryController.text.trim();
+    if (name.isEmpty) return;
+
+    setState(() => _isSaving = true);
+    final provider = Provider.of<ProductInventoryProvider>(context, listen: false);
+    final category = await provider.addCategory(name);
+    setState(() => _isSaving = false);
+
+    if (category != null) {
+      setState(() {
+        _selectedCategory = category;
+        _isCreatingNewCategory = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Category created successfully')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create category: ${provider.error ?? 'Unknown error'}')),
+      );
+    }
+  }
+
+  Future<void> _saveProduct() async {
     if (_formKey.currentState!.validate()) {
+      if (_selectedCategory == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select or create a category')),
+        );
+        return;
+      }
+
       final name = _nameController.text.trim();
-      final category = _categoryController.text.trim();
-      final sku = _skuController.text.trim().isEmpty ? 'AUTO-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}' : _skuController.text.trim();
+      final sku = _skuController.text.trim();
       final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
       final stock = int.tryParse(_stockController.text.trim()) ?? 0;
+      final minStock = int.tryParse(_minStockController.text.trim()) ?? 0;
       
-      String status = 'in stock';
-      if (stock == 0) {
-        status = 'out of-stock';
-      } else if (stock < 10) {
-        status = 'low stock';
+      final maxStockInput = _maxStockController.text.trim();
+      int maxStock = maxStockInput.isEmpty ? stock : (int.tryParse(maxStockInput) ?? stock);
+      
+      // If stock is increased beyond current max stock, update max stock to match
+      if (stock > maxStock) {
+        maxStock = stock;
       }
 
+      setState(() => _isSaving = true);
       final provider = Provider.of<ProductInventoryProvider>(context, listen: false);
 
+      final productData = {
+        'name': name,
+        'sku_code': sku.isEmpty ? null : sku,
+        'category_id': _selectedCategory!.id,
+        'price': price,
+        'quantity': stock,
+        'min_stock': minStock,
+        'max_stock': maxStock,
+      };
+
+      bool success;
       if (widget.productToEdit != null) {
-        final updated = ProductInventory(
-          id: widget.productToEdit!.id,
-          name: name,
-          sku: sku,
-          category: category,
-          price: price,
-          stock: stock,
-          status: status,
-        );
-        provider.updateProduct(updated);
+        success = await provider.updateProduct(widget.productToEdit!.id!, productData);
       } else {
-        final newProduct = ProductInventory(
-          id: DateTime.now().toString(),
-          name: name,
-          sku: sku,
-          category: category,
-          price: price,
-          stock: stock,
-          status: status,
-        );
-        provider.addProduct(newProduct);
+        success = await provider.addProduct(productData);
       }
 
-      Navigator.of(context).pop();
+      if (mounted) {
+        setState(() => _isSaving = false);
+        if (success) {
+          Navigator.of(context).pop();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to save product: ${provider.error ?? 'Unknown error'}')),
+          );
+        }
+      }
     }
   }
 
@@ -115,9 +160,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                         color: Color(0xFF0A0A0A),
                       ),
                     ),
-                    InkWell(
-                      onTap: () => Navigator.of(context).pop(),
-                      child: const Icon(Icons.close, size: 22, color: Color(0xFF0A0A0A)),
+                    IconButton(
+                      icon: const Icon(Icons.close),
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
                 ),
@@ -164,20 +209,16 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
-                        onPressed: () {
-                          if (_categoryController.text.isNotEmpty) {
-                            setState(() {
-                              _isCreatingNewCategory = false;
-                            });
-                          }
-                        },
+                        onPressed: _isSaving ? null : _createCategory,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF00B8DB),
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           elevation: 0,
                         ),
-                        child: const Text('Create', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal)),
+                        child: _isSaving 
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : const Text('Create', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal)),
                       ),
                     ],
                   ),
@@ -196,27 +237,25 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                   ),
                 ] else ...[
                   LayoutBuilder(
-                    builder: (context, constraints) => Autocomplete<String>(
+                    builder: (context, constraints) => Autocomplete<Category>(
+                      displayStringForOption: (Category option) => option.name,
                       optionsBuilder: (TextEditingValue textEditingValue) {
                         final provider = Provider.of<ProductInventoryProvider>(context, listen: false);
-                        final existingCategories = provider.products.map((p) => p.category).toSet().toList()..sort();
+                        final existingCategories = provider.categories;
                         if (textEditingValue.text.isEmpty) {
                           return existingCategories;
                         }
-                        return existingCategories.where((cat) => cat.toLowerCase().contains(textEditingValue.text.toLowerCase()));
+                        return existingCategories.where((cat) => cat.name.toLowerCase().contains(textEditingValue.text.toLowerCase()));
                       },
-                      onSelected: (String selection) {
-                        _categoryController.text = selection;
+                      onSelected: (Category selection) {
+                        setState(() {
+                          _selectedCategory = selection;
+                          _categoryController.text = selection.name;
+                        });
                       },
                       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
-                        // Keep controllers in sync
-                        controller.addListener(() {
-                          if (controller.text != _categoryController.text) {
-                            _categoryController.text = controller.text;
-                          }
-                        });
-                        if (_categoryController.text.isNotEmpty && controller.text.isEmpty) {
-                          controller.text = _categoryController.text;
+                        if (_selectedCategory != null && controller.text != _selectedCategory!.name) {
+                          controller.text = _selectedCategory!.name;
                         }
                         return TextFormField(
                           controller: controller,
@@ -261,7 +300,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                                     onTap: () => onSelected(option),
                                     child: Padding(
                                       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
-                                      child: Text(option, style: TextStyle(fontSize: 16, color: Colors.black.withOpacity(0.8))),
+                                      child: Text(option.name, style: TextStyle(fontSize: 16, color: Colors.black.withOpacity(0.8))),
                                     ),
                                   );
                                 },
@@ -278,10 +317,11 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                       setState(() {
                         _categoryController.clear();
                         _isCreatingNewCategory = true;
+                        _selectedCategory = null;
                       });
                     },
                     child: const Text(
-                      'Go to create new a category >',
+                      'Create a new category>',
                       style: TextStyle(color: Color(0xFF2563EB), fontSize: 14),
                     ),
                   ),
@@ -333,6 +373,42 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+
+                // Min & Max Stock
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel('Min Stock *'),
+                          const SizedBox(height: 8),
+                          _buildTextField(
+                            controller: _minStockController,
+                            hint: '10',
+                            keyboardType: TextInputType.number,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel('Max Stock *'),
+                          const SizedBox(height: 8),
+                          _buildTextField(
+                            controller: _maxStockController,
+                            hint: '50',
+                            keyboardType: TextInputType.number,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 32),
 
                 // Footer Buttons
@@ -352,14 +428,16 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ElevatedButton(
-                        onPressed: _saveProduct,
+                        onPressed: _isSaving ? null : _saveProduct,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF00B8DB),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                           elevation: 0,
                         ),
-                        child: Text(widget.productToEdit == null ? 'Add Product' : 'Save Changes', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal)),
+                        child: _isSaving 
+                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                          : Text(widget.productToEdit == null ? 'Add Product' : 'Save Changes', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.normal)),
                       ),
                     ),
                   ],

@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:point_sale/features/products/providers/product_inventory_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:point_sale/features/cart/providers/cart_provider.dart';
 import 'package:point_sale/features/cart/presentation/widgets/cart_item_card.dart';
 import 'package:point_sale/features/cart/presentation/widgets/customer_information_modal.dart';
 import 'package:point_sale/features/cart/presentation/widgets/payment_method_modal.dart';
 
-class CartScreen extends StatelessWidget {
+class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
+
+  @override
+  State<CartScreen> createState() => _CartScreenState();
+}
+
+class _CartScreenState extends State<CartScreen> {
+  String? _customerName;
 
   void showSuccessToast(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -42,9 +50,7 @@ class CartScreen extends StatelessWidget {
         ),
         backgroundColor: const Color(0xFF00D492).withOpacity(0.75),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 3),
       ),
@@ -92,10 +98,7 @@ class CartScreen extends StatelessWidget {
             ),
             bottom: PreferredSize(
               preferredSize: const Size.fromHeight(1),
-              child: Container(
-                color: const Color(0xFFE5E7EB),
-                height: 1.15,
-              ),
+              child: Container(color: const Color(0xFFE5E7EB), height: 1.15),
             ),
           ),
           body: Column(
@@ -172,19 +175,25 @@ class CartScreen extends StatelessWidget {
                     : ListView.separated(
                         padding: const EdgeInsets.all(16),
                         itemCount: cart.items.length,
-                        separatorBuilder: (context, index) =>
-                            const SizedBox(height: 12),
+                        separatorBuilder: (context, index) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
+                          final cartItem = cart.items[index];
                           return CartItemCard(
-                            product: cart.items[index],
+                            product: cartItem.product,
+                            cartQuantity: cartItem.quantity,
                             onIncrement: () {
-                              cart.incrementQuantity(cart.items[index].id);
+                              final success = cart.incrementQuantity(cartItem.product.id);
+                              if (!success) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Cannot add more. Out of stock!')),
+                                );
+                              }
                             },
                             onDecrement: () {
-                              cart.decrementQuantity(cart.items[index].id);
+                              cart.decrementQuantity(cartItem.product.id);
                             },
                             onRemove: () {
-                              cart.removeItem(cart.items[index].id);
+                              cart.removeItem(cartItem.product.id);
                             },
                           );
                         },
@@ -196,10 +205,7 @@ class CartScreen extends StatelessWidget {
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   border: Border(
-                    top: BorderSide(
-                      color: Color(0xFFE5E7EB),
-                      width: 1.15,
-                    ),
+                    top: BorderSide(color: Color(0xFFE5E7EB), width: 1.15),
                   ),
                 ),
                 padding: const EdgeInsets.fromLTRB(16, 17, 16, 0),
@@ -310,20 +316,34 @@ class CartScreen extends StatelessWidget {
                             onPressed: cart.isEmpty
                                 ? null
                                 : () async {
+                                    final cartItems = cart.items.map((item) => {
+                                      'product_id': item.product.id,
+                                      'quantity': item.quantity,
+                                      'price': item.product.price,
+                                      'name': item.product.name,
+                                    }).toList();
+
                                     final result = await showDialog<String>(
                                       context: context,
                                       barrierDismissible: true,
                                       builder: (BuildContext context) {
                                         return PaymentMethodModal(
+                                          subtotal: cart.subtotal,
+                                          tax: cart.tax,
                                           totalAmount: cart.total,
+                                          items: cartItems,
+                                          customerName: _customerName,
                                         );
                                       },
                                     );
-                                    
-                                    if (result != null && context.mounted) {
+
+                                    if (result != null && mounted) {
                                       // Payment confirmed - clear cart and show toast
                                       cart.clearCart();
-                                      showSuccessToast(context, 'Payment confirmed with $result');
+                                      showSuccessToast(
+                                        context,
+                                        'Order created and paid with $result',
+                                      );
                                     }
                                   },
                             style: ElevatedButton.styleFrom(
@@ -355,17 +375,23 @@ class CartScreen extends StatelessWidget {
                             onPressed: cart.isEmpty
                                 ? null
                                 : () async {
-                                    final customerInfo = await showDialog<Map<String, String>>(
-                                      context: context,
-                                      barrierDismissible: true,
-                                      builder: (BuildContext context) {
-                                        return const CustomerInformationModal();
-                                      },
-                                    );
+                                    final customerInfo =
+                                        await showDialog<Map<String, String>>(
+                                          context: context,
+                                          barrierDismissible: true,
+                                          builder: (BuildContext context) {
+                                            return const CustomerInformationModal();
+                                          },
+                                        );
 
-                                    if (customerInfo != null && context.mounted) {
+                                    if (customerInfo != null &&
+                                        mounted) {
                                       final nickname = customerInfo['nickname'];
-                                      if (nickname != null && nickname.isNotEmpty) {
+                                      setState(() {
+                                        _customerName = nickname;
+                                      });
+                                      if (nickname != null &&
+                                          nickname.isNotEmpty) {
                                         showSuccessToast(
                                           context,
                                           'Customer info added for $nickname',

@@ -14,10 +14,10 @@ import 'package:point_sale/features/analytics/presentation/screens/analytics_scr
 
 class AppRoutes {
   static const String home = '/';
-  static const String checkout = '/checkout';
-  static const String logout = '/logout';
   static const String signin = '/signin';
   static const String signup = '/signup';
+  static const String checkout = '/checkout';
+  static const String logout = '/logout';
   static const String forgetPassword = '/forget-password';
   static const String stockmanagement = '/stock';
   static const String about = '/about';
@@ -27,10 +27,10 @@ class AppRoutes {
   static const String analytics = '/analytics';
 
   static Map<String, WidgetBuilder> routes = {
+    home: (context ) => const HomeScreen(),
     signin: (context) => const SignInScreen(),
     signup: (context) => const SignUpScreen(),
     forgetPassword: (context) => const ForgotPasswordScreen(),
-    home: (context ) => const HomeScreen(),
     checkout: (context) => const CheckoutScreen(),
     stockmanagement: (context) => const StockManagementView(),
     about: (context) => const AboutUsScreen(),

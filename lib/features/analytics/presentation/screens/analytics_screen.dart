@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:point_sale/core/widgets/app_drawer.dart';
 import 'package:point_sale/core/theme/app_colors.dart';
+import 'package:provider/provider.dart';
+import 'package:point_sale/features/analytics/providers/analytics_provider.dart';
+import 'package:intl/intl.dart';
 
 class AnalyticsScreen extends StatefulWidget {
   const AnalyticsScreen({super.key});
@@ -11,10 +14,19 @@ class AnalyticsScreen extends StatefulWidget {
 }
 
 class _AnalyticsScreenState extends State<AnalyticsScreen> {
-  String _selectedTimeFilter = 'Week';
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<AnalyticsProvider>().fetchAnalytics();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.watch<AnalyticsProvider>();
+    final data = provider.data;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -50,173 +62,129 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
         centerTitle: true,
       ),
       drawer: AppDrawer(),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildTimeFilter(),
-            const SizedBox(height: 16),
-            _buildSummaryCards(),
-            const SizedBox(height: 16),
-            _buildSalesOverviewCard(),
-            const SizedBox(height: 16),
-            _buildOrdersTrendCard(),
-            const SizedBox(height: 16),
-            _buildSalesByCategoryCard(),
-            const SizedBox(height: 16),
-            _buildTopSellingProductsCard(),
-          ],
+      body: provider.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : provider.error.isNotEmpty
+              ? Center(child: Text(provider.error))
+              : data == null
+                  ? const Center(child: Text('No data available'))
+                  : RefreshIndicator(
+                      onRefresh: provider.fetchAnalytics,
+                      child: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildTimeFilter(provider),
+                            const SizedBox(height: 16),
+                            _buildSummaryCards(data['summary']),
+                            const SizedBox(height: 16),
+                            _buildSalesOverviewCard(data['sales_trends']),
+                            const SizedBox(height: 16),
+                            _buildOrdersTrendCard(data['sales_trends']),
+                            const SizedBox(height: 16),
+                            _buildSalesByCategoryCard(data['category_sales']),
+                            const SizedBox(height: 16),
+                            _buildTopSellingProductsCard(data['top_products']),
+                          ],
+                        ),
+                      ),
+                    ),
+    );
+  }
+
+  Widget _buildTimeFilter(AnalyticsProvider provider) {
+    return Row(
+      children: [
+        _buildFilterChip('Week', provider),
+        const SizedBox(width: 8),
+        _buildFilterChip('Month', provider),
+        const SizedBox(width: 8),
+        _buildFilterChip('Year', provider),
+      ],
+    );
+  }
+
+  Widget _buildFilterChip(String label, AnalyticsProvider provider) {
+    final isSelected = provider.period == label.toLowerCase();
+    return Expanded(
+      child: SizedBox(
+        height: 50,
+        child: ChoiceChip(
+          label: Center(child: Text(label)),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) {
+              provider.setPeriod(label);
+            }
+          },
+          padding: EdgeInsets.zero,
+          showCheckmark: false,
+          selectedColor: AppColors.primary,
+          labelStyle: TextStyle(
+            color: isSelected ? Colors.white : AppColors.textSecondary,
+          ),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+            side: BorderSide(
+              color: isSelected ? AppColors.primary : AppColors.borderDark,
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTimeFilter() {
-    return Row(
-      children: [
-        Expanded(
-          child: SizedBox(
-            height: 50,
-            child: ChoiceChip(
-              label: Center(child: Text('Week')),
-              selected: _selectedTimeFilter == 'Week',
-              onSelected: (selected) {
-                setState(() {
-                  _selectedTimeFilter = 'Week';
-                });
-              },
-              padding: EdgeInsets.zero,
-              showCheckmark: false,
-              selectedColor: AppColors.primary,
-              labelStyle: TextStyle(
-                color: _selectedTimeFilter == 'Week'
-                    ? Colors.white
-                    : AppColors.textSecondary,
-              ),
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-                side: BorderSide(
-                  color: _selectedTimeFilter == 'Week'
-                      ? AppColors.primary
-                      : AppColors.borderDark,
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: SizedBox(
-            height: 50,
-            child: ChoiceChip(
-              label: Center(child: Text('Month')),
-              selected: _selectedTimeFilter == 'Month',
-              onSelected: (selected) {
-                setState(() {
-                  _selectedTimeFilter = 'Month';
-                });
-              },
-              padding: EdgeInsets.zero,
-              showCheckmark: false,
-              selectedColor: AppColors.primary,
-              labelStyle: TextStyle(
-                color: _selectedTimeFilter == 'Month'
-                    ? Colors.white
-                    : AppColors.textSecondary,
-              ),
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-                side: BorderSide(
-                  color: _selectedTimeFilter == 'Month'
-                      ? AppColors.primary
-                      : AppColors.borderDark,
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: SizedBox(
-            height: 50,
-            child: ChoiceChip(
-              label: Center(child: Text('Year')),
-              selected: _selectedTimeFilter == 'Year',
-              onSelected: (selected) {
-                setState(() {
-                  _selectedTimeFilter = 'Year';
-                });
-              },
-              padding: EdgeInsets.zero,
-              showCheckmark: false,
-              selectedColor: AppColors.primary,
-              labelStyle: TextStyle(
-                color: _selectedTimeFilter == 'Year'
-                    ? Colors.white
-                    : AppColors.textSecondary,
-              ),
-              backgroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-                side: BorderSide(
-                  color: _selectedTimeFilter == 'Year'
-                      ? AppColors.primary
-                      : AppColors.borderDark,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSummaryCards() {
+  Widget _buildSummaryCards(Map<String, dynamic> summary) {
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
       crossAxisSpacing: 16.0,
       mainAxisSpacing: 16.0,
-      childAspectRatio: 1.5, // Adjust as needed
+      childAspectRatio: 1.5,
       children: [
         _buildSummaryCard(
           icon: Icons.attach_money_rounded,
           iconColor: Colors.greenAccent.shade700,
           title: 'Total Revenue',
-          value: '\$24,847',
-          change: '+12.5%',
+          value: '\$${_formatValue(summary['total_revenue'])}',
+          change: summary['revenue_change'] ?? '',
           changeColor: Colors.green,
         ),
         _buildSummaryCard(
           icon: Icons.show_chart,
           iconColor: Colors.blueGrey.shade700,
           title: 'Avg Order Value',
-          value: '\$109.50',
-          change: '+3.1%',
+          value: '\$${_formatValue(summary['avg_order_value'])}',
+          change: '',
           changeColor: Colors.green,
         ),
         _buildSummaryCard(
-          icon: Icons.people_outlined,
+          icon: Icons.shopping_bag_outlined,
           iconColor: Colors.orangeAccent.shade700,
-          title: 'Customers',
-          value: '164',
-          change: '+15.3%',
+          title: 'Total Items',
+          value: '${summary['total_items']}',
+          change: '',
           changeColor: Colors.green,
         ),
         _buildSummaryCard(
           icon: Icons.shopping_cart_outlined,
           iconColor: Colors.blueAccent.shade700,
           title: 'Total Orders',
-          value: '227',
-          change: '+8.2%',
+          value: '${summary['order_count']}',
+          change: summary['order_change'] ?? '',
           changeColor: Colors.green,
         ),
       ],
     );
+  }
+
+  String _formatValue(dynamic value) {
+    if (value == null) return '0.00';
+    final numValue = value is num ? value : double.tryParse(value.toString()) ?? 0.0;
+    return NumberFormat('#,##0.00').format(numValue);
   }
 
   Widget _buildSummaryCard({
@@ -242,7 +210,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 color: iconColor,
@@ -263,10 +231,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                Text(
-                  change,
-                  style: TextStyle(color: changeColor, fontSize: 12),
-                ),
+                if (change.isNotEmpty)
+                  Text(
+                    change,
+                    style: TextStyle(color: changeColor, fontSize: 12),
+                  ),
               ],
             ),
           ],
@@ -275,7 +244,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildSalesOverviewCard() {
+  Widget _buildSalesOverviewCard(List<dynamic> trends) {
+    if (trends.isEmpty) return const SizedBox.shrink();
+
+    final List<FlSpot> spots = [];
+    double maxY = 0;
+    for (int i = 0; i < trends.length; i++) {
+      final revenue = double.tryParse(trends[i]['revenue'].toString()) ?? 0.0;
+      spots.add(FlSpot(i.toDouble(), revenue));
+      if (revenue > maxY) maxY = revenue;
+    }
+
+    maxY = (maxY * 1.2).ceilToDouble();
+    if (maxY == 0) maxY = 1000;
+
     return Card(
       color: Colors.white,
       elevation: 0,
@@ -300,69 +282,32 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                   gridData: FlGridData(
                     show: true,
                     drawVerticalLine: true,
-                    getDrawingHorizontalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey.withOpacity(0.2),
-                        strokeWidth: 1,
-                      );
-                    },
-                    getDrawingVerticalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey.withOpacity(0.2),
-                        strokeWidth: 1,
-                      );
-                    },
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: Colors.grey.withOpacity(0.1),
+                      strokeWidth: 1,
+                    ),
+                    getDrawingVerticalLine: (value) => FlLine(
+                      color: Colors.grey.withOpacity(0.1),
+                      strokeWidth: 1,
+                    ),
                   ),
                   titlesData: FlTitlesData(
                     show: true,
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        interval: 1,
                         getTitlesWidget: (value, meta) {
-                          const style = TextStyle(
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          );
-                          Widget text;
-                          switch (value.toInt()) {
-                            case 0:
-                              text = const Text('Mon', style: style);
-                              break;
-                            case 1:
-                              text = const Text('Tue', style: style);
-                              break;
-                            case 2:
-                              text = const Text('Wed', style: style);
-                              break;
-                            case 3:
-                              text = const Text('Thu', style: style);
-                              break;
-                            case 4:
-                              text = const Text('Fri', style: style);
-                              break;
-                            case 5:
-                              text = const Text('Sat', style: style);
-                              break;
-                            case 6:
-                              text = const Text('Sun', style: style);
-                              break;
-                            default:
-                              text = const Text('', style: style);
-                              break;
-                          }
+                          final index = value.toInt();
+                          if (index < 0 || index >= trends.length) return const SizedBox.shrink();
+                          final dateStr = trends[index]['date'].toString();
+                          final date = DateTime.tryParse(dateStr);
+                          final text = date != null ? DateFormat('MM/dd').format(date) : dateStr;
                           return SideTitleWidget(
                             axisSide: meta.axisSide,
-                            space: 0,
-                            child: text,
+                            child: Text(text, style: const TextStyle(fontSize: 10, color: Colors.grey)),
                           );
                         },
                       ),
@@ -370,75 +315,33 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 40,
-                        interval: 1500,
+                        reservedSize: 45,
                         getTitlesWidget: (value, meta) {
-                          const style = TextStyle(
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          );
-                          String text;
-                          if (value == 0) {
-                            text = '0';
-                          } else if (value == 1500) {
-                            text = '1500';
-                          } else if (value == 3000) {
-                            text = '3000';
-                          } else if (value == 4500) {
-                            text = '4500';
-                          } else if (value == 6000) {
-                            text = '6000';
-                          } else {
-                            return Container();
-                          }
                           return SideTitleWidget(
                             axisSide: meta.axisSide,
-                            space: 5,
-                            child: Text(text, style: style),
+                            child: Text(_formatCompact(value), style: const TextStyle(fontSize: 10, color: Colors.grey)),
                           );
                         },
                       ),
                     ),
                   ),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(
-                      color: Colors.grey.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
+                  borderData: FlBorderData(show: false),
                   minX: 0,
-                  maxX: 6,
+                  maxX: (trends.length - 1).toDouble(),
                   minY: 0,
-                  maxY: 6000,
+                  maxY: maxY,
                   lineBarsData: [
                     LineChartBarData(
-                      spots: const [
-                        FlSpot(0, 2500),
-                        FlSpot(1, 1500),
-                        FlSpot(2, 3500),
-                        FlSpot(3, 3800),
-                        FlSpot(4, 4800),
-                        FlSpot(5, 3750),
-                        FlSpot(6, 4300),
-                      ],
+                      spots: spots,
                       isCurved: true,
-                      color: AppColors.primary, // Teal color
+                      color: AppColors.primary,
                       barWidth: 3,
                       isStrokeCapRound: true,
-                      dotData: FlDotData(
+                      dotData: const FlDotData(show: false),
+                      belowBarData: BarAreaData(
                         show: true,
-                        getDotPainter: (spot, percent, bar, index) {
-                          return FlDotCirclePainter(
-                            radius: 4,
-                            color: AppColors.primary,
-                            strokeColor: Colors.white,
-                            strokeWidth: 2,
-                          );
-                        },
+                        color: AppColors.primary.withOpacity(0.1),
                       ),
-                      belowBarData: BarAreaData(show: false),
                     ),
                   ],
                 ),
@@ -450,7 +353,38 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildOrdersTrendCard() {
+  String _formatCompact(double value) {
+    if (value >= 1000000) return '${(value / 1000000).toStringAsFixed(1)}M';
+    if (value >= 1000) return '${(value / 1000).toStringAsFixed(1)}k';
+    return value.toStringAsFixed(0);
+  }
+
+  Widget _buildOrdersTrendCard(List<dynamic> trends) {
+    if (trends.isEmpty) return const SizedBox.shrink();
+
+    final List<BarChartGroupData> groups = [];
+    double maxY = 0;
+    for (int i = 0; i < trends.length; i++) {
+      final count = double.tryParse(trends[i]['order_count'].toString()) ?? 0.0;
+      groups.add(
+        BarChartGroupData(
+          x: i,
+          barRods: [
+            BarChartRodData(
+              toY: count,
+              color: const Color.fromRGBO(16, 185, 129, 1),
+              width: 16,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ],
+        ),
+      );
+      if (count > maxY) maxY = count;
+    }
+
+    maxY = (maxY * 1.2).ceilToDouble();
+    if (maxY == 0) maxY = 10;
+
     return Card(
       color: Colors.white,
       elevation: 0,
@@ -474,70 +408,29 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                 BarChartData(
                   gridData: FlGridData(
                     show: true,
-                    drawVerticalLine: true,
-                    getDrawingHorizontalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey.withOpacity(0.2),
-                        strokeWidth: 1,
-                      );
-                    },
-                    getDrawingVerticalLine: (value) {
-                      return FlLine(
-                        color: Colors.grey.withOpacity(0.2),
-                        strokeWidth: 1,
-                      );
-                    },
+                    drawVerticalLine: false,
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: Colors.grey.withOpacity(0.1),
+                      strokeWidth: 1,
+                    ),
                   ),
                   titlesData: FlTitlesData(
                     show: true,
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     bottomTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
                         reservedSize: 30,
-                        interval: 1,
                         getTitlesWidget: (value, meta) {
-                          const style = TextStyle(
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          );
-                          Widget text;
-                          switch (value.toInt()) {
-                            case 0:
-                              text = const Text('Mon', style: style);
-                              break;
-                            case 1:
-                              text = const Text('Tue', style: style);
-                              break;
-                            case 2:
-                              text = const Text('Wed', style: style);
-                              break;
-                            case 3:
-                              text = const Text('Thu', style: style);
-                              break;
-                            case 4:
-                              text = const Text('Fri', style: style);
-                              break;
-                            case 5:
-                              text = const Text('Sat', style: style);
-                              break;
-                            case 6:
-                              text = const Text('Sun', style: style);
-                              break;
-                            default:
-                              text = const Text('', style: style);
-                              break;
-                          }
+                          final index = value.toInt();
+                          if (index < 0 || index >= trends.length) return const SizedBox.shrink();
+                          final dateStr = trends[index]['date'].toString();
+                          final date = DateTime.tryParse(dateStr);
+                          final text = date != null ? DateFormat('MM/dd').format(date) : dateStr;
                           return SideTitleWidget(
                             axisSide: meta.axisSide,
-                            child: text,
-                            space: 0,
+                            child: Text(text, style: const TextStyle(fontSize: 10, color: Colors.grey)),
                           );
                         },
                       ),
@@ -545,125 +438,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
                     leftTitles: AxisTitles(
                       sideTitles: SideTitles(
                         showTitles: true,
-                        reservedSize: 40,
-                        interval: 15,
+                        reservedSize: 30,
                         getTitlesWidget: (value, meta) {
-                          const style = TextStyle(
-                            color: Colors.grey,
-                            fontWeight: FontWeight.w500,
-                            fontSize: 12,
-                          );
-                          String text;
-                          if (value == 0) {
-                            text = '0';
-                          } else if (value == 15) {
-                            text = '15';
-                          } else if (value == 30) {
-                            text = '30';
-                          } else if (value == 45) {
-                            text = '45';
-                          } else if (value == 60) {
-                            text = '60';
-                          } else {
-                            return Container();
-                          }
                           return SideTitleWidget(
                             axisSide: meta.axisSide,
-                            space: 5,
-                            child: Text(text, style: style),
+                            child: Text(value.toInt().toString(), style: const TextStyle(fontSize: 10, color: Colors.grey)),
                           );
                         },
                       ),
                     ),
                   ),
-                  borderData: FlBorderData(
-                    show: true,
-                    border: Border.all(
-                      color: Colors.grey.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
-                  barGroups: [
-                    BarChartGroupData(
-                      x: 0,
-                      barRods: [
-                        BarChartRodData(
-                          toY: 25,
-                          color: Color.fromRGBO(16, 185, 129, 1),
-                          width: 32,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ],
-                    ),
-                    BarChartGroupData(
-                      x: 1,
-                      barRods: [
-                        BarChartRodData(
-                          toY: 18,
-                          color: Color.fromRGBO(16, 185, 129, 1),
-                          width: 32,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ],
-                    ),
-                    BarChartGroupData(
-                      x: 2,
-                      barRods: [
-                        BarChartRodData(
-                          toY: 30,
-                          color: Color.fromRGBO(16, 185, 129, 1),
-                          width: 32,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ],
-                    ),
-                    BarChartGroupData(
-                      x: 3,
-                      barRods: [
-                        BarChartRodData(
-                          toY: 28,
-                          color: Color.fromRGBO(16, 185, 129, 1),
-                          width: 32,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ],
-                    ),
-                    BarChartGroupData(
-                      x: 4,
-                      barRods: [
-                        BarChartRodData(
-                          toY: 45,
-                          color: Color.fromRGBO(16, 185, 129, 1),
-                          width: 32,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ],
-                    ),
-                    BarChartGroupData(
-                      x: 5,
-                      barRods: [
-                        BarChartRodData(
-                          toY: 42,
-                          color: Color.fromRGBO(16, 185, 129, 1),
-                          width: 32,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ],
-                    ),
-                    BarChartGroupData(
-                      x: 6,
-                      barRods: [
-                        BarChartRodData(
-                          toY: 48,
-                          color: Color.fromRGBO(16, 185, 129, 1),
-                          width: 32,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ],
-                    ),
-                  ],
+                  borderData: FlBorderData(show: false),
+                  barGroups: groups,
                   minY: 0,
-                  maxY: 60,
+                  maxY: maxY,
                 ),
               ),
             ),
@@ -673,7 +461,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildSalesByCategoryCard() {
+  Widget _buildSalesByCategoryCard(List<dynamic> categorySales) {
+    if (categorySales.isEmpty) return const SizedBox.shrink();
+
+    final totalRevenue = categorySales.fold(0.0, (sum, item) => sum + (double.tryParse(item['revenue'].toString()) ?? 0.0));
+
     return Card(
       color: Colors.white,
       elevation: 0,
@@ -691,10 +483,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
-            _buildCategoryProgress('Electronics', 45, 100),
-            _buildCategoryProgress('Accessories', 25, 100),
-            _buildCategoryProgress('Audio', 15, 100),
-            _buildCategoryProgress('Other', 15, 100),
+            ...categorySales.map((item) {
+              final revenue = double.tryParse(item['revenue'].toString()) ?? 0.0;
+              final percent = totalRevenue > 0 ? (revenue / totalRevenue) * 100 : 0.0;
+              return _buildCategoryProgress(item['name'], percent.toInt(), 100);
+            }),
           ],
         ),
       ),
@@ -710,7 +503,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(category, style: const TextStyle(fontSize: 16)),
-              Text('$value', style: const TextStyle(fontSize: 16)),
+              Text('$value%', style: const TextStyle(fontSize: 16)),
             ],
           ),
           const SizedBox(height: 8),
@@ -728,7 +521,9 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     );
   }
 
-  Widget _buildTopSellingProductsCard() {
+  Widget _buildTopSellingProductsCard(List<dynamic> topProducts) {
+    if (topProducts.isEmpty) return const SizedBox.shrink();
+
     return Card(
       color: Colors.white,
       elevation: 0,
@@ -746,21 +541,20 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
             ),
             const SizedBox(height: 16),
-            ListView(
+            ListView.separated(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              children: [
-                _buildProductListItem(
-                  1,
-                  'Wireless Mouse',
-                  '156 sold',
-                  '\$4,678',
-                ),
-                const Divider(height: 1, thickness: 0.5,),
-                _buildProductListItem(2, 'Keyboard', '142 sold', '\$11,358'),
-                const Divider(height: 1, thickness: 0.5,),
-                _buildProductListItem(3, 'Headphones', '98 sold', '\$14,700'),
-              ],
+              itemCount: topProducts.length,
+              separatorBuilder: (context, index) => const Divider(height: 1, thickness: 0.5),
+              itemBuilder: (context, index) {
+                final product = topProducts[index];
+                return _buildProductListItem(
+                  index + 1,
+                  product['name'],
+                  '${product['sold_count']} sold',
+                  '\$${_formatValue(product['revenue'])}',
+                );
+              },
             ),
           ],
         ),
@@ -775,11 +569,11 @@ class _AnalyticsScreenState extends State<AnalyticsScreen> {
     String revenue,
   ) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             decoration: BoxDecoration(
               color: AppColors.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8)

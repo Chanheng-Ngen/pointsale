@@ -8,23 +8,15 @@ import 'package:flutter/foundation.dart' show kDebugMode;
 
 class AuthService {
   static const String _authTokenKey = 'auth_token';
-  static String? _authToken;
-
-  static String? get authToken => _authToken;
 
   static String get _registerUrl => ApiConstants.register;
   static String get _loginUrl => ApiConstants.login;
   static String get _logoutUrl => ApiConstants.logout;
-  static String get _userUrl => ApiConstants.user;
+  static String get _meUrl => ApiConstants.me;
 
-  Future<void> restoreSession() async {
+  Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    _authToken = prefs.getString(_authTokenKey);
-  }
-
-  Future<bool> isLoggedIn() async {
-    await restoreSession();
-    return _authToken != null && _authToken!.trim().isNotEmpty;
+    return prefs.getString(_authTokenKey);
   }
 
   Future<void> _saveToken(String token) async {
@@ -35,7 +27,6 @@ class AuthService {
   Future<void> _clearToken() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_authTokenKey);
-    _authToken = null;
   }
 
   Future<RegisterResult> register({
@@ -107,10 +98,10 @@ class AuthService {
           : <String, dynamic>{};
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        _authToken = _extractToken(jsonBody);
+        final token = _extractToken(jsonBody);
 
-        if (_authToken != null && _authToken!.trim().isNotEmpty) {
-          await _saveToken(_authToken!);
+        if (token != null && token.trim().isNotEmpty) {
+          await _saveToken(token);
         }
 
         UserSession.instance.user = jsonBody['data'] as Map<String, dynamic>?;
@@ -118,7 +109,7 @@ class AuthService {
         return LoginResult(
           success: true,
           message: _extractSuccessMessage(jsonBody) ?? 'Login successful.',
-          token: _authToken,
+          token: token,
         );
       }
 
@@ -140,16 +131,16 @@ class AuthService {
     }
   }
 
-  Future<LogoutResult> logout({String? token}) async {
+  Future<LogoutResult> logout() async {
     try {
-      final authToken = token ?? _authToken;
+      final token = await getToken();
       final headers = <String, String>{
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       };
 
-      if (authToken != null && authToken.trim().isNotEmpty) {
-        headers['Authorization'] = 'Bearer ${authToken.trim()}';
+      if (token != null && token.trim().isNotEmpty) {
+        headers['Authorization'] = 'Bearer ${token.trim()}';
       }
 
       final response = await http.delete(
@@ -162,18 +153,20 @@ class AuthService {
           : <String, dynamic>{};
 
       if (response.statusCode == 200 || response.statusCode == 204) {
-        UserSession.instance.clear();
         await _clearToken();
+        UserSession.instance.clear();
+
         return LogoutResult(
           success: true,
           message: _extractSuccessMessage(jsonBody) ?? 'Logged out successfully.',
         );
       }
 
-      final message = _extractErrorMessage(jsonBody) ??
-          'Logout failed (${response.statusCode}). Please try again.';
-
-      return LogoutResult(success: false, message: message);
+      return LogoutResult(
+        success: false,
+        message: _extractErrorMessage(jsonBody) ??
+          'Logout failed (${response.statusCode}). Please try again.',
+      );
     } on TimeoutException {
       return LogoutResult(
         success: false,

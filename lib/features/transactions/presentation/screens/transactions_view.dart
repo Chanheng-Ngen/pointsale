@@ -8,8 +8,21 @@ import 'package:point_sale/features/transactions/presentation/widgets/transactio
 import 'package:point_sale/core/widgets/app_drawer.dart';
 
 
-class TransactionsView extends StatelessWidget {
+class TransactionsView extends StatefulWidget {
   const TransactionsView({super.key});
+
+  @override
+  State<TransactionsView> createState() => _TransactionsViewState();
+}
+
+class _TransactionsViewState extends State<TransactionsView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<TransactionProvider>().fetchTransactions();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,43 +95,43 @@ class TransactionsView extends StatelessWidget {
               children: [
                 _buildSummaryCard(
                   context,
-                  'Sales',
+                  'Total Sales',
                   '\$${provider.totalSales.toStringAsFixed(2)}',
                   const Color.fromRGBO(0, 212, 146, 1),
                 ),
                 _buildSummaryCard(
                   context,
-                  'Refunds',
-                  '\$${provider.totalRefunds.abs().toStringAsFixed(2)}',
-                  const Color.fromRGBO(245, 73, 0, 1),
+                  'Total Items',
+                  '${provider.totalItems}',
+                  const Color.fromRGBO(74, 144, 226, 1),
                 ),
                 _buildSummaryCard(
                   context,
-                  'Expenses',
-                  '\$${provider.totalExpenses.abs().toStringAsFixed(2)}',
-                  const Color.fromRGBO(251, 44, 54, 1),
+                  'Total Orders',
+                  '${provider.transactionCount}',
+                  const Color.fromRGBO(245, 166, 35, 1),
                 ),
-              ],
-            ),
-            SizedBox(height: 18),
-            Row(
-              children: [
-                _buildFilterChip(context, 'All', provider),
-                _buildFilterChip(context, 'Sale', provider),
-                _buildFilterChip(context, 'Refund', provider),
-                _buildFilterChip(context, 'Expense', provider),
               ],
             ),
             SizedBox(height: 20),
             Expanded(
-              child: ListView.builder(
-                itemCount: provider.transactions.length,
-                itemBuilder: (context, index) {
-                  return TransactionCard(
-                    transaction: provider.transactions[index],
-                  );
-                },
-              ),
+              child: provider.isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : provider.error.isNotEmpty
+                      ? Center(child: Text(provider.error))
+                      : provider.transactions.isEmpty
+                          ? const Center(child: Text('No transactions found'))
+                          : RefreshIndicator(
+                              onRefresh: provider.fetchTransactions,
+                              child: ListView.builder(
+                                itemCount: provider.transactions.length,
+                                itemBuilder: (context, index) {
+                                  return TransactionCard(
+                                    transaction: provider.transactions[index],
+                                  );
+                                },
+                              ),
+                            ),
             ),
           ],
         ),
@@ -155,39 +168,6 @@ class TransactionsView extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(
-    BuildContext context,
-    String label,
-    TransactionProvider provider,
-  ) {
-    final isSelected = provider.selectedFilter == label;
-    return Padding(
-      padding: const EdgeInsets.only(right: 8.0),
-      child: SizedBox(
-        height: 50,
-        child: ChoiceChip(
-          showCheckmark: false,
-          label: Center(child: Text(label)),
-          selected: isSelected,
-          labelStyle: TextStyle(
-            color: isSelected ? Colors.white : AppColors.textSecondary,
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 10),
-          onSelected: (selected) {
-            if (selected) {
-              provider.setSelectedFilter(label);
-            }
-          },
-          selectedColor: AppColors.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-            side: BorderSide(color: AppColors.borderDark),
           ),
         ),
       ),

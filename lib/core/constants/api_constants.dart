@@ -15,5 +15,11 @@ class ApiConstants {
   static String get register => '$baseUrl/auth/register';
   static String get login => '$baseUrl/auth/login';
   static String get logout => '$baseUrl/auth/logout';
-  static String get user => '$baseUrl/auth/me';
+  static String get me => '$baseUrl/auth/me';
+  static String get products => '$baseUrl/products';
+  static String get categories => '$baseUrl/categories';
+  static String get orders => '$baseUrl/orders';
+  static String get transactions => '$baseUrl/transactions';
+  static String get transactionStats => '$baseUrl/transactions/stats';
+  static String get analytics => '$baseUrl/analytics';
 }

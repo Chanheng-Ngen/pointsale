@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:point_sale/features/products/data/models/product_model.dart';
+import 'package:point_sale/features/products/data/models/product_inventory.dart';
 import 'package:point_sale/core/constants/app_color.dart';
 
 class CartItemCard extends StatelessWidget {
-  final Product product;
+  final ProductInventory product;
+  final int cartQuantity;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
   final VoidCallback onRemove;
@@ -11,6 +12,7 @@ class CartItemCard extends StatelessWidget {
   const CartItemCard({
     super.key,
     required this.product,
+    required this.cartQuantity,
     required this.onIncrement,
     required this.onDecrement,
     required this.onRemove,
@@ -18,7 +20,7 @@ class CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final itemTotal = product.price * product.quantity;
+    final itemTotal = product.price * cartQuantity;
 
     return Container(
       padding: const EdgeInsets.all(17),
@@ -58,9 +60,9 @@ class CartItemCard extends StatelessWidget {
                 ),
                 child: Center(
                   child: Text(
-                    product.emoji,
+                    product.name,
                     style: const TextStyle(
-                      fontSize: 30,
+                      fontSize: 18,
                       height: 1.2,
                     ),
                   ),
@@ -148,7 +150,7 @@ class CartItemCard extends StatelessWidget {
                       width: 32,
                       child: Center(
                         child: Text(
-                          '${product.quantity}',
+                          '$cartQuantity',
                           style: const TextStyle(
                             fontFamily: 'Arimo',
                             fontSize: 16,

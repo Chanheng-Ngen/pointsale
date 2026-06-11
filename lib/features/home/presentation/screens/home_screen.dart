@@ -155,7 +155,7 @@ class HomeScreen extends StatelessWidget {
                   // Quick Action Buttons
                   _buildActionButton(
                     icon: Icons.attach_money,
-                    iconColor: const Color(0xFF00B8D0),
+                    iconColor: Colors.lightBlue.shade300,
                     label: 'Quick Sale',
                     onTap: () {
                       Navigator.pushNamed(context, '/checkout');
@@ -164,7 +164,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   _buildActionButton(
                     icon: Icons.shopping_cart,
-                    iconColor: const Color(0xFF155DFC),
+                    iconColor: Colors.blue.shade400,
                     label: 'View Orders',
                     onTap: () {
                       Navigator.pushNamed(context, '/orders');
@@ -173,10 +173,10 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   _buildActionButton(
                     icon: Icons.inventory_2,
-                    iconColor: const Color(0xFF00D492),
+                    iconColor: Colors.lightBlueAccent.shade700,
                     label: 'Manage Products',
                     onTap: () {
-                      Navigator.pushNamed(context, '/manage_products');
+                      Navigator.pushNamed(context, '/stock');
                     },
                   ),
                   const SizedBox(height: 16),
@@ -247,7 +247,7 @@ class HomeScreen extends StatelessWidget {
         height: 80,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         decoration: BoxDecoration(
-          color: const Color(0xFF4A5565),
+          color: Colors.lightBlue.shade700,
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(

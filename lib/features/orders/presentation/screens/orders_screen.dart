@@ -5,8 +5,21 @@ import 'package:point_sale/features/orders/presentation/widgets/order_card.dart'
 import 'package:point_sale/features/orders/presentation/widgets/order_details_modal.dart';
 import 'package:point_sale/core/widgets/app_drawer.dart';
 
-class OrdersScreen extends StatelessWidget {
+class OrdersScreen extends StatefulWidget {
   const OrdersScreen({super.key});
+
+  @override
+  State<OrdersScreen> createState() => _OrdersScreenState();
+}
+
+class _OrdersScreenState extends State<OrdersScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<OrderProvider>().fetchOrders();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,23 +127,48 @@ class OrdersScreen extends StatelessWidget {
               const SizedBox(height: 20),
 
               Expanded(
-                child: ListView.builder(
-                  itemCount: provider.orders.length,
-                  itemBuilder: (context, index) {
-                    final order = provider.orders[index];
-                    return OrderCard(
-                      order: order,
-                      onViewDetails: () {
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                          builder: (context) => OrderDetailsModal(order: order),
-                        );
-                      },
-                    );
-                  },
-                ),
+                child: provider.isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : provider.error.isNotEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Error: ${provider.error}',
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                            const SizedBox(height: 16),
+                            ElevatedButton(
+                              onPressed: provider.fetchOrders,
+                              child: const Text('Retry'),
+                            ),
+                          ],
+                        ),
+                      )
+                    : provider.orders.isEmpty
+                    ? const Center(child: Text('No orders found'))
+                    : RefreshIndicator(
+                        onRefresh: provider.fetchOrders,
+                        child: ListView.builder(
+                          itemCount: provider.orders.length,
+                          itemBuilder: (context, index) {
+                            final order = provider.orders[index];
+                            return OrderCard(
+                              order: order,
+                              onViewDetails: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  isScrollControlled: true,
+                                  backgroundColor: Colors.transparent,
+                                  builder: (context) =>
+                                      OrderDetailsModal(order: order),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
               ),
             ],
           ),

@@ -73,10 +73,13 @@ class ProductsScreen extends StatelessWidget {
                 color: Colors.white,
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: TextField(
-                  onChanged: provider.setSearchQuery,
+                  onChanged: provider.setProductSearchQuery,
                   decoration: InputDecoration(
                     hintText: 'Search products...',
-                    hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                    hintStyle: TextStyle(
+                      color: Colors.grey.shade400,
+                      fontSize: 14,
+                    ),
                     prefixIcon: Icon(Icons.search, color: Colors.grey.shade400),
                     filled: true,
                     fillColor: const Color(0xFFF9FAFB),
@@ -107,8 +110,8 @@ class ProductsScreen extends StatelessWidget {
                       child: _buildSummaryCard(
                         'Total',
                         '${provider.totalProducts}',
-                        const Color(0xFFEFF6FF), // Blue 50
-                        const Color(0xFF3B82F6), // Blue 500
+                        Colors.blue[100]!, // Blue 50
+                        Colors.blue[500]!, // Blue 500
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -139,7 +142,11 @@ class ProductsScreen extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: Row(
                   children: [
-                    const Icon(Icons.category, size: 18, color: Color(0xFF4B5563)),
+                    const Icon(
+                      Icons.category,
+                      size: 18,
+                      color: Color(0xFF4B5563),
+                    ),
                     const SizedBox(width: 8),
                     const Text(
                       'Categories',
@@ -164,33 +171,61 @@ class ProductsScreen extends StatelessWidget {
                     itemCount: provider.categoriesWithCounts.length,
                     itemBuilder: (context, index) {
                       final cat = provider.categoriesWithCounts[index];
+                      final isSelected =
+                          (cat['name'] == 'All' &&
+                              provider.productSelectedCategory == null) ||
+                          provider.productSelectedCategory == cat['name'];
                       return Container(
                         margin: const EdgeInsets.only(right: 8),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.grey.shade200),
-                        ),
-                        child: Row(
-                          children: [
-                            Text(
-                              cat['name'],
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF374151),
+                        child: Material(
+                          color: isSelected ? Colors.cyan : Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          clipBehavior: Clip.antiAlias,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(12),
+                            hoverColor: Colors.cyan.withValues(alpha: 0.1),
+                            onTap: () {
+                              provider.selectProductCategory(cat['name']);
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: isSelected
+                                      ? Colors.cyan
+                                      : Colors.grey.shade200,
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    cat['name'],
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : const Color(0xFF374151),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '(${cat['count']})',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: isSelected
+                                          ? Colors.white70
+                                          : Colors.grey.shade500,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                            const SizedBox(width: 6),
-                            Text(
-                              '(${cat['count']})',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: Colors.grey.shade500,
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       );
                     },
@@ -201,10 +236,17 @@ class ProductsScreen extends StatelessWidget {
               // Product List List
               Expanded(
                 child: ListView.builder(
-                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 80), // Bottom padding for scrolling
-                  itemCount: provider.products.length,
+                  padding: const EdgeInsets.fromLTRB(
+                    16,
+                    16,
+                    16,
+                    80,
+                  ), // Bottom padding for scrolling
+                  itemCount: provider.filteredProducts.length,
                   itemBuilder: (context, index) {
-                    return ProductListCard(product: provider.products[index]);
+                    return ProductListCard(
+                      product: provider.filteredProducts[index],
+                    );
                   },
                 ),
               ),
@@ -215,7 +257,12 @@ class ProductsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryCard(String title, String value, Color bgColor, Color textColor) {
+  Widget _buildSummaryCard(
+    String title,
+    String value,
+    Color bgColor,
+    Color textColor,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(

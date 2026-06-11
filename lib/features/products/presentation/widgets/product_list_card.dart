@@ -9,23 +9,48 @@ class ProductListCard extends StatelessWidget {
 
   const ProductListCard({super.key, required this.product});
 
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Never';
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      if (difference.inHours == 0) {
+        if (difference.inMinutes == 0) {
+          return 'Just now';
+        }
+        return '${difference.inMinutes}m ago';
+      }
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final lastUpdated = product.updatedAt ?? product.createdAt;
     // Determine colors based on status
     Color badgeColor;
     Color badgeTextColor;
+    String text;
 
     switch (product.status) {
-      case 'low stock':
+      case 'low_stock':
+        text = 'Low Stock';
         badgeColor = const Color(0xFFFEF3C7); // Amber 100
         badgeTextColor = const Color(0xFFD97706); // Amber 600
         break;
-      case 'out of-stock':
+      case 'out_of_stock':
+        text = 'Out of Stock';
         badgeColor = const Color(0xFFFEE2E2); // Red 100
         badgeTextColor = const Color(0xFFDC2626); // Red 600
         break;
-      case 'in stock':
+      case 'in_stock':
       default:
+        text = 'In Stock';
         badgeColor = const Color(0xFFD1FAE5); // Emerald 100
         badgeTextColor = const Color(0xFF059669); // Emerald 600
         break;
@@ -71,7 +96,7 @@ class ProductListCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
-                  product.status,
+                  text,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
@@ -84,13 +109,13 @@ class ProductListCard extends StatelessWidget {
           
           const SizedBox(height: 8),
           
-          // Second row: SKU and Category
+          // Second row: SKU, Category and Last Updated
           Row(
             children: [
               Text('#', style: TextStyle(fontSize: 14, color: Colors.grey.shade500, fontWeight: FontWeight.bold)),
               const SizedBox(width: 4),
               Text(
-                product.sku,
+                product.skuCode ?? '',
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
               ),
               const SizedBox(width: 8),
@@ -99,8 +124,15 @@ class ProductListCard extends StatelessWidget {
               Icon(Icons.local_offer_outlined, size: 14, color: Colors.grey.shade500),
               const SizedBox(width: 4),
               Text(
-                product.category,
+                product.category?.name ?? '',
                 style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+              ),
+              const Spacer(),
+              Icon(Icons.access_time, size: 12, color: Colors.grey.shade400),
+              const SizedBox(width: 4),
+              Text(
+                _formatDate(lastUpdated),
+                style: TextStyle(fontSize: 11, color: Colors.grey.shade500),
               ),
             ],
           ),
@@ -139,14 +171,39 @@ class ProductListCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Stock', style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                  Text('Available', style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Icon(Icons.inventory_2_outlined, size: 16, color: Colors.grey.shade800),
                       const SizedBox(width: 4),
                       Text(
-                        '${product.stock}',
+                        '${product.quantity}',
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF111827),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(width: 20),
+              
+              // Max block
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Max', style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(Icons.inventory, size: 16, color: Colors.grey.shade800),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${product.maxStock}',
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -170,8 +227,14 @@ class ProductListCard extends StatelessWidget {
                     );
                   }),
                   const SizedBox(width: 12),
-                  _buildIconButton(Icons.delete_outline, const Color(0xFFEF4444), () {
-                    Provider.of<ProductInventoryProvider>(context, listen: false).deleteProduct(product.id);
+                  _buildIconButton(Icons.delete_outline, const Color(0xFFEF4444), () async {
+                    final scaffoldMessenger = ScaffoldMessenger.of(context);
+                    final success = await Provider.of<ProductInventoryProvider>(context, listen: false).deleteProduct(product.id!);
+                    if (!success) {
+                      scaffoldMessenger.showSnackBar(
+                        const SnackBar(content: Text('Failed to delete product')),
+                      );
+                    }
                   }),
                 ],
               ),

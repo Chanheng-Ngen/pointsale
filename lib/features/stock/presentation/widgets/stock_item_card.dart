@@ -1,16 +1,37 @@
 import 'package:flutter/material.dart';
-import 'package:point_sale/features/stock/data/models/stock_item.dart';
+import 'package:point_sale/features/products/data/models/product_inventory.dart';
 import 'package:point_sale/features/stock/presentation/widgets/restock_modal.dart';
 
 class StockItemCard extends StatelessWidget {
-  final StockItem item;
+  final ProductInventory item;
 
   const StockItemCard({super.key, required this.item});
 
+  String _formatDate(DateTime? date) {
+    if (date == null) return 'Never';
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      if (difference.inHours == 0) {
+        if (difference.inMinutes == 0) {
+          return 'Just now';
+        }
+        return '${difference.inMinutes}m ago';
+      }
+      return '${difference.inHours}h ago';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays}d ago';
+    } else {
+      return '${date.day}/${date.month}/${date.year}';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isLowStock = item.status == 'low';
-    final stockPercentage = (item.current / item.max).clamp(0.0, 1.0);
+    final isLowStock = item.quantity < item.minStock;
+    final stockPercentage = (item.quantity / item.maxStock).clamp(0.0, 1.0);
+    final lastUpdated = item.updatedAt ?? item.createdAt;
 
     return Card(
       elevation: 0,
@@ -46,7 +67,7 @@ class StockItemCard extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  'SKU: ${item.sku}',
+                  'SKU: ${item.skuCode ?? "N/A"}',
                   style: const TextStyle(
                     fontFamily: 'Arimo',
                     fontSize: 12,
@@ -63,7 +84,7 @@ class StockItemCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  item.category,
+                  item.category?.name ?? 'Uncategorized',
                   style: const TextStyle(
                     fontFamily: 'Arimo',
                     fontSize: 12,
@@ -101,7 +122,7 @@ class StockItemCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  '${item.current}/${item.max}',
+                  '${item.quantity}/${item.maxStock}',
                   style: const TextStyle(
                     fontFamily: 'Arimo',
                     fontSize: 12,
@@ -116,7 +137,7 @@ class StockItemCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Min: ${item.min}',
+                  'Min: ${item.minStock}',
                   style: const TextStyle(
                     fontFamily: 'Arimo',
                     fontSize: 12,
@@ -124,7 +145,7 @@ class StockItemCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Last restocked: ${item.lastRestocked}',
+                  'Last restocked: ${_formatDate(lastUpdated)}',
                   style: const TextStyle(
                     fontFamily: 'Arimo',
                     fontSize: 12,

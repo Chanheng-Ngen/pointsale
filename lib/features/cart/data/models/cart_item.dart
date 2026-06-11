@@ -1,18 +1,20 @@
+import 'package:point_sale/features/products/data/models/product_inventory.dart';
+
 class CartItem {
-  final String productId;
+  final ProductInventory product;
   final int quantity;
 
   CartItem({
-    required this.productId,
+    required this.product,
     required this.quantity,
   });
 
   CartItem copyWith({
-    String? productId,
+    ProductInventory? product,
     int? quantity,
   }) {
     return CartItem(
-      productId: productId ?? this.productId,
+      product: product ?? this.product,
       quantity: quantity ?? this.quantity,
     );
   }

@@ -1,17 +1,21 @@
 import 'package:flutter/foundation.dart';
-import 'package:point_sale/features/products/data/models/product_model.dart';
+import 'package:point_sale/features/cart/data/models/cart_item.dart';
+import 'package:point_sale/features/products/data/models/product_inventory.dart';
 
 class CartProvider extends ChangeNotifier {
-  final List<Product> _items = [];
+  final List<CartItem> _items = [];
 
-  List<Product> get items => List.unmodifiable(_items);
+  List<CartItem> get items => List.unmodifiable(_items);
 
   int get totalItems {
     return _items.fold(0, (sum, item) => sum + item.quantity);
   }
 
   double get subtotal {
-    return _items.fold(0, (sum, item) => sum + (item.price * item.quantity));
+    return _items.fold(
+      0,
+      (sum, item) => sum + (item.product.price * item.quantity),
+    );
   }
 
   double get tax {
@@ -24,31 +28,50 @@ class CartProvider extends ChangeNotifier {
 
   bool get isEmpty => _items.isEmpty;
 
-  void addProduct(Product product) {
-    final index = _items.indexWhere((p) => p.id == product.id);
+  bool addProduct(ProductInventory product) {
+    final index = _items.indexWhere((item) => item.product.id == product.id);
     
+    // The limit is the lesser of maxStock or actual quantity
+    final limit = product.maxStock < product.quantity ? product.maxStock : product.quantity;
+
     if (index != -1) {
+      if (_items[index].quantity >= limit) {
+        return false; // Limit reached
+      }
       _items[index] = _items[index].copyWith(
         quantity: _items[index].quantity + 1,
       );
     } else {
-      _items.add(product.copyWith(quantity: 1));
+      if (limit <= 0) {
+        return false; // Out of stock or limit is 0
+      }
+      _items.add(CartItem(product: product, quantity: 1));
     }
+
     notifyListeners();
+    return true;
   }
 
-  void incrementQuantity(String productId) {
-    final index = _items.indexWhere((p) => p.id == productId);
+  bool incrementQuantity(int? productId) {
+    final index = _items.indexWhere((p) => p.product.id == productId);
     if (index != -1) {
+      final product = _items[index].product;
+      final limit = product.maxStock < product.quantity ? product.maxStock : product.quantity;
+
+      if (_items[index].quantity >= limit) {
+        return false; // Cannot exceed limit
+      }
       _items[index] = _items[index].copyWith(
         quantity: _items[index].quantity + 1,
       );
       notifyListeners();
+      return true;
     }
+    return false;
   }
 
-  void decrementQuantity(String productId) {
-    final index = _items.indexWhere((p) => p.id == productId);
+  void decrementQuantity(int? productId) {
+    final index = _items.indexWhere((p) => p.product.id == productId);
     if (index != -1) {
       if (_items[index].quantity > 1) {
         _items[index] = _items[index].copyWith(
@@ -61,8 +84,8 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  void removeItem(String productId) {
-    _items.removeWhere((p) => p.id == productId);
+  void removeItem(int? productId) {
+    _items.removeWhere((p) => p.product.id == productId);
     notifyListeners();
   }
 
@@ -71,14 +94,21 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateQuantity(String productId, int quantity) {
+  void updateQuantity(int? productId, int quantity) {
     if (quantity <= 0) {
       removeItem(productId);
       return;
     }
 
-    final index = _items.indexWhere((p) => p.id == productId);
+    final index = _items.indexWhere((p) => p.product.id == productId);
     if (index != -1) {
+      final product = _items[index].product;
+      final limit = product.maxStock < product.quantity ? product.maxStock : product.quantity;
+
+      // Validate against limit
+      if (quantity > limit) {
+        quantity = limit;
+      }
       _items[index] = _items[index].copyWith(quantity: quantity);
       notifyListeners();
     }

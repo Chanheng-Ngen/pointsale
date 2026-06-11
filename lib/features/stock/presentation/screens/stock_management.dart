@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart' hide SearchBar;
+import 'package:point_sale/features/products/providers/product_inventory_provider.dart';
 import 'package:provider/provider.dart';
 
-import 'package:point_sale/features/stock/providers/stock_provider.dart';
 import 'package:point_sale/features/stock/presentation/widgets/search_bar.dart';
 import 'package:point_sale/features/stock/presentation/widgets/category_filters.dart';
 import 'package:point_sale/features/stock/presentation/widgets/stock_item_card.dart';
@@ -16,7 +16,7 @@ class StockManagementView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stock = context.watch<StockProvider>();
+    final stock = context.watch<ProductInventoryProvider>();
 
     return Scaffold(
       drawer: AppDrawer(),
@@ -62,60 +62,73 @@ class StockManagementView extends StatelessWidget {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          SearchBar(value: stock.searchQuery, onChanged: stock.setSearch),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: SummaryCard(
-                  title: 'Low Stock',
-                  value: stock.lowStockItems.length.toString(),
-                  icon: Icons.warning_amber_rounded,
-                  iconColor: Colors.red,
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: SummaryCard(
-                  title: 'Total Value',
-                  value: '\$${stock.totalValue.toStringAsFixed(2)}',
-                  icon: Icons.inventory_2_outlined,
-                  iconColor: Colors.blue,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          CategoryFilters(
-            categories: const ['All', 'Electronics', 'Accessories', 'Audio'],
-            selected: stock.selectedCategory,
-            onSelect: stock.setCategory,
-          ),
-          const SizedBox(height: 16),
-          StatusFilters(
-            statuses: const ['All Items', 'Low Stock', 'Normal', 'Well Stocked'],
-            selected: stock.selectedStatus,
-            onSelect: stock.setStatus,
-          ),
-          const SizedBox(height: 16),
-          LowStockAlert(
-            lowStockCount: stock.lowStockCount,
-            onRestockAll: stock.restockAllLow,
-          ),
-          const SizedBox(height: 16),
-          ...stock.items.map(
-            (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: StockItemCard(
-                item: item,
+      body: stock.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: stock.loadProducts,
+              child: ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  SearchBar(
+                    value: stock.stockSearchQuery,
+                    onChanged: stock.setStockSearchQuery,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SummaryCard(
+                          title: 'Low Stock',
+                          value: stock.lowStockCount.toString(),
+                          icon: Icons.warning_amber_rounded,
+                          iconColor: Colors.red,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: SummaryCard(
+                          title: 'Total Value',
+                          value: '\$${stock.totalStockValue.toStringAsFixed(2)}',
+                          icon: Icons.inventory_2_outlined,
+                          iconColor: Colors.blue,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  CategoryFilters(
+                    categories: stock.categoryNames,
+                    selected: stock.stockSelectedCategory ?? 'All',
+                    onSelect: stock.selectStockCategory,
+                  ),
+                  const SizedBox(height: 16),
+                  StatusFilters(
+                    statuses: const [
+                      'All Items',
+                      'Low Stock',
+                      'Normal',
+                      'Well Stocked'
+                    ],
+                    selected: stock.stockSelectedStatus,
+                    onSelect: stock.setStockStatus,
+                  ),
+                  const SizedBox(height: 16),
+                  LowStockAlert(
+                    lowStockCount: stock.lowStockCount,
+                    onRestockAll: stock.restockAllLow,
+                  ),
+                  const SizedBox(height: 16),
+                  ...stock.stockFilteredProducts.map(
+                    (item) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: StockItemCard(
+                        item: item,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-        ],
-      ),
     );
   }
 }

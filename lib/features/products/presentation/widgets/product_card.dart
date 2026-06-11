@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:point_sale/features/products/data/models/product_model.dart';
+import 'package:point_sale/features/products/data/models/product_inventory.dart';
 import 'package:point_sale/core/constants/app_color.dart';
 
 class ProductCard extends StatelessWidget {
-  final Product product;
+  final ProductInventory product;
+  final int cartQuantity;
   final VoidCallback onAddPressed;
   final VoidCallback onIncrement;
   final VoidCallback onDecrement;
@@ -11,6 +12,7 @@ class ProductCard extends StatelessWidget {
   const ProductCard({
     super.key,
     required this.product,
+    required this.cartQuantity,
     required this.onAddPressed,
     required this.onIncrement,
     required this.onDecrement,
@@ -29,22 +31,7 @@ class ProductCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Emoji Icon
-          const SizedBox(height: 16),
-          SizedBox(
-            height: 56,
-            child: Center(
-              child: Text(
-                product.emoji,
-                style: const TextStyle(
-                  fontSize: 36,
-                  height: 1.11,
-                ),
-              ),
-            ),
-          ),
           const SizedBox(height: 8),
-          
           // Product Name
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -80,7 +67,7 @@ class ProductCard extends StatelessWidget {
             child: SizedBox(
               width: double.infinity,
               height: 36,
-              child: product.isInCart
+              child: cartQuantity > 0
                   ? Container(
                       decoration: BoxDecoration(
                         color: AppColor.primary.withOpacity(0.75),
@@ -109,7 +96,7 @@ class ProductCard extends StatelessWidget {
                           ),
                           // Quantity
                           Text(
-                            '${product.quantity}',
+                            '$cartQuantity',
                             style: TextStyle(
                               fontFamily: 'Arimo',
                               fontSize: 16,

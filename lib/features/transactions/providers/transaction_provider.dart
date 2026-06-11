@@ -1,106 +1,119 @@
 import 'package:flutter/material.dart';
+import 'package:point_sale/core/constants/api_constants.dart';
+import 'package:point_sale/core/services/api_service.dart';
 import 'package:point_sale/features/transactions/data/models/transaction.dart';
 
 class TransactionProvider extends ChangeNotifier {
-  final List<Transaction> _transactions = [
-    Transaction(
-      id: 'TXN-1001',
-      type: 'sale',
-      description: 'Order #ORD-1001',
-      paymentMethod: 'Card',
-      time: '10:30 AM',
-      amount: 119.97,
-    ),
-    Transaction(
-      id: 'TXN-1002',
-      type: 'sale',
-      description: 'Order #ORD-1002',
-      paymentMethod: 'Cash',
-      time: '11:15 AM',
-      amount: 249.95,
-    ),
-    Transaction(
-      id: 'TXN-1003',
-      type: 'refund',
-      description: 'Return - Order #ORD-998',
-      paymentMethod: 'Card',
-      time: '12:00 PM',
-      amount: -45.00,
-    ),
-    Transaction(
-      id: 'TXN-1004',
-      type: 'sale',
-      description: 'Order #ORD-1003',
-      paymentMethod: 'Digital',
-      time: '12:30 PM',
-      amount: 89.98,
-    ),
-    Transaction(
-      id: 'TXN-1005',
-      type: 'expense',
-      description: 'Office Supplies',
-      paymentMethod: 'Card',
-      time: '01:00 PM',
-      amount: -125.50,
-    ),
-    Transaction(
-      id: 'TXN-1006',
-      type: 'sale',
-      description: 'Order #ORD-1004',
-      paymentMethod: 'Card',
-      time: '01:45 PM',
-      amount: 299.99,
-    ),
-  ];
+  final ApiService _apiService = ApiService();
+  List<Transaction> _transactions = [];
+  bool _isLoading = false;
+  String _error = '';
+
+  bool get isLoading => _isLoading;
+  String get error => _error;
 
   String _searchQuery = '';
-  String _selectedFilter = 'All';
-
-  String get selectedFilter => _selectedFilter;
-
   List<Transaction> get transactions {
-    List<Transaction> filteredTransactions = _transactions;
-
-    if (_selectedFilter != 'All') {
-      filteredTransactions = filteredTransactions
-          .where((t) => t.type == _selectedFilter.toLowerCase())
-          .toList();
+    if (_searchQuery.isEmpty) {
+      return _transactions;
     }
 
-    if (_searchQuery.isNotEmpty) {
-      filteredTransactions = filteredTransactions
-          .where(
-            (t) =>
-                t.id.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-                t.description.toLowerCase().contains(
-                  _searchQuery.toLowerCase(),
-                ),
-          )
-          .toList();
-    }
-
-    return filteredTransactions;
+    return _transactions
+        .where(
+          (t) =>
+              (t.transactionNumber ?? t.id)
+                  .toLowerCase()
+                  .contains(_searchQuery.toLowerCase()) ||
+              t.description.toLowerCase().contains(
+                    _searchQuery.toLowerCase(),
+                  ),
+        )
+        .toList();
   }
 
-  double get totalSales => _transactions
-      .where((t) => t.type == 'sale')
-      .fold(0.0, (sum, item) => sum + item.amount);
+  double _totalSales = 0.0;
+  int _totalItems = 0;
+  int _transactionCount = 0;
 
-  double get totalRefunds => _transactions
-      .where((t) => t.type == 'refund')
-      .fold(0.0, (sum, item) => sum + item.amount.abs());
-
-  double get totalExpenses => _transactions
-      .where((t) => t.type == 'expense')
-      .fold(0.0, (sum, item) => sum + item.amount.abs());
+  double get totalSales => _totalSales;
+  int get totalItems => _totalItems;
+  int get transactionCount => _transactionCount;
 
   void setSearchQuery(String query) {
     _searchQuery = query;
     notifyListeners();
   }
 
-  void setSelectedFilter(String filter) {
-    _selectedFilter = filter;
+  Future<void> fetchTransactions() async {
+    _isLoading = true;
+    _error = '';
     notifyListeners();
+
+    try {
+      final List data = await _apiService.get(ApiConstants.transactions);
+      _transactions = data.map((json) => Transaction.fromJson(json)).toList();
+      await fetchStats();
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchStats() async {
+    try {
+      final data = await _apiService.get(ApiConstants.transactionStats);
+      _totalSales = _toDouble(data['total_sales']);
+      _totalItems = _toInt(data['total_items']);
+      _transactionCount = _toInt(data['transaction_count']);
+    } catch (e) {
+      debugPrint('Error fetching stats: $e');
+    }
+  }
+
+  int _toInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
+  }
+
+  Future<void> createTransaction({
+    required String type,
+    required String description,
+    required String paymentMethod,
+    required double amount,
+    String? orderId,
+  }) async {
+    _isLoading = true;
+    _error = '';
+    notifyListeners();
+
+    try {
+      final transactionData = {
+        'type': type,
+        'description': description,
+        'payment_method': paymentMethod,
+        'amount': amount,
+        'order_id': orderId,
+      };
+
+      final response = await _apiService.post(ApiConstants.transactions, transactionData);
+      final newTransaction = Transaction.fromJson(response);
+      _transactions.insert(0, newTransaction);
+    } catch (e) {
+      _error = e.toString();
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 }

@@ -15,6 +15,8 @@ class CategoryFilters extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const radius = BorderRadius.all(Radius.circular(10));
+
     return SizedBox(
       height: 50,
       child: ListView.separated(
@@ -25,20 +27,32 @@ class CategoryFilters extends StatelessWidget {
           final c = categories[i];
           final isSelected = c == selected;
 
-          return InkWell(
-            onTap: () => onSelect(c),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.surface,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: AppColors.borderDark),
-              ),
-              child: Text(
-                c,
-                style: TextStyle(
-                  color: isSelected ? Colors.white : AppColors.textSecondary,
+          return Material(
+            color: isSelected ? AppColors.primary : AppColors.surface,
+            borderRadius: radius,
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              borderRadius: radius,
+              hoverColor: AppColors.primary.withValues(alpha: 0.1),
+              onTap: () => onSelect(c),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  borderRadius: radius,
+                  border: Border.all(
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.borderDark,
+                  ),
+                ),
+                child: Text(
+                  c,
+                  style: TextStyle(
+                    color: isSelected
+                        ? Colors.white
+                        : AppColors.textSecondary,
+                  ),
                 ),
               ),
             ),

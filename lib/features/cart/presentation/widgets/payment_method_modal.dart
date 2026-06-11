@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:point_sale/core/constants/app_color.dart';
+import 'package:point_sale/features/orders/providers/order_provider.dart';
+import 'package:point_sale/features/products/providers/product_inventory_provider.dart';
+import 'package:provider/provider.dart';
 
 class PaymentMethodModal extends StatefulWidget {
+  final double subtotal;
+  final double tax;
   final double totalAmount;
+  final List<Map<String, dynamic>> items;
+  final String? customerName;
 
   const PaymentMethodModal({
     super.key,
+    required this.subtotal,
+    required this.tax,
     required this.totalAmount,
+    required this.items,
+    this.customerName,
   });
 
   @override
@@ -14,7 +25,8 @@ class PaymentMethodModal extends StatefulWidget {
 }
 
 class _PaymentMethodModalState extends State<PaymentMethodModal> {
-  String selectedPaymentMethod = 'Credit/Debit Card';
+  String selectedPaymentMethod = 'KHQR Code';
+  bool isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +57,11 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {
-                    Navigator.pop(context);
-                  },
+                  onTap: isProcessing
+                      ? null
+                      : () {
+                          Navigator.pop(context);
+                        },
                   borderRadius: BorderRadius.circular(10),
                   child: Container(
                     width: 36,
@@ -67,7 +81,7 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
             // Payment Methods
             Column(
               children: [
-                // Credit/Debit Card
+                // KHQR Code
                 _buildPaymentOption(
                   icon: Icons.qr_code,
                   label: 'KHQR Code',
@@ -126,9 +140,11 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                   child: SizedBox(
                     height: 50,
                     child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
+                      onPressed: isProcessing
+                          ? null
+                          : () {
+                              Navigator.pop(context);
+                            },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: const Color(0xFF0A0A0A),
                         side: const BorderSide(
@@ -157,9 +173,49 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                   child: SizedBox(
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(context, selectedPaymentMethod);
-                      },
+                      onPressed: isProcessing
+                          ? null
+                          : () async {
+                              setState(() {
+                                isProcessing = true;
+                              });
+
+                              try {
+                                final orderProvider =
+                                    context.read<OrderProvider>();
+                                final success =
+                                    await orderProvider.createOrder(
+                                      items: widget.items,
+                                      subtotal: widget.subtotal,
+                                      tax: widget.tax,
+                                      total: widget.totalAmount,
+                                      paymentMethod: selectedPaymentMethod,
+                                      customerName: widget.customerName,
+                                    );
+
+                                if (success != null && mounted) {
+                                  // Refresh products to update stock levels
+                                  context
+                                      .read<ProductInventoryProvider>()
+                                      .loadProducts();
+                                  Navigator.pop(context, selectedPaymentMethod);
+                                } else if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        'Failed to create order: ${orderProvider.error}',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } finally {
+                                if (mounted) {
+                                  setState(() {
+                                    isProcessing = false;
+                                  });
+                                }
+                              }
+                            },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColor.primary,
                         foregroundColor: AppColor.whiteWithOpacity(0.9),
@@ -168,14 +224,23 @@ class _PaymentMethodModalState extends State<PaymentMethodModal> {
                         ),
                         elevation: 0,
                       ),
-                      child: const Text(
-                        'Confirm Payment',
-                        style: TextStyle(
-                          fontFamily: 'Arimo',
-                          fontSize: 16,
-                          height: 1.5,
-                        ),
-                      ),
+                      child: isProcessing
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text(
+                              'Confirm Payment',
+                              style: TextStyle(
+                                fontFamily: 'Arimo',
+                                fontSize: 16,
+                                height: 1.5,
+                              ),
+                            ),
                     ),
                   ),
                 ),

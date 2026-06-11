@@ -51,7 +51,7 @@ class OrderDetailsModal extends StatelessWidget {
                   const Text('Order ID', style: TextStyle(color: Colors.grey, fontSize: 13)),
                   const SizedBox(height: 4),
                   Text(
-                    order.id, 
+                    order.orderNumber, 
                     style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
                   ),
                 ],
@@ -82,7 +82,7 @@ class OrderDetailsModal extends StatelessWidget {
               const Icon(Icons.calendar_today_outlined, color: Colors.grey, size: 20),
               const SizedBox(width: 8),
               Text(
-                '2026-03-30 at ${order.time}', // Mocked date or use real
+                '${order.date} at ${order.time}',
                 style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
               ),
             ],
@@ -161,16 +161,18 @@ class OrderDetailsModal extends StatelessWidget {
               width: double.infinity,
               height: 48,
               child: OutlinedButton(
-                onPressed: () {
+                onPressed: () async {
                   final provider = Provider.of<OrderProvider>(context, listen: false);
-                  provider.updateOrderStatus(order.id, 'completed');
-                  Navigator.of(context).pop();
+                  await provider.markAsPaid(order.id);
+                  if (context.mounted) {
+                    Navigator.of(context).pop();
+                  }
                 },
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: Color(0xFF00B8D0)),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                 ),
-                child: const Text('Make as Paid', style: TextStyle(color: Color(0xFF00B8D0), fontSize: 16, fontWeight: FontWeight.w500)),
+                child: const Text('Mark as Paid', style: TextStyle(color: Color(0xFF00B8D0), fontSize: 16, fontWeight: FontWeight.w500)),
               ),
             ),
             const SizedBox(height: 12),
@@ -270,54 +272,60 @@ class OrderDetailsModal extends StatelessWidget {
                   const SizedBox(height: 16),
                   ConstrainedBox(
                     constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.7),
-                    child: ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: order.itemCount > 0 ? order.itemCount : 1,
-                      separatorBuilder: (context, index) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Icon(Icons.mouse, color: Colors.grey),
+                    child: order.items.isEmpty 
+                      ? const Center(child: Padding(
+                          padding: EdgeInsets.all(20.0),
+                          child: Text('No item details available'),
+                        ))
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: order.items.length,
+                          separatorBuilder: (context, index) => const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final item = order.items[index];
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              const SizedBox(width: 12),
-                              const Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('Wireless Mouse', style: TextStyle(fontWeight: FontWeight.w500)),
-                                    Row(
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 40,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Icon(Icons.shopping_bag_outlined, color: Colors.grey),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text('\$29.99', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 6.0),
-                                          child: Icon(Icons.close, size: 12,),
+                                        Text(item.name, style: const TextStyle(fontWeight: FontWeight.w500)),
+                                        Row(
+                                          children: [
+                                            Text('\$${item.price.toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
+                                            const Padding(
+                                              padding: EdgeInsets.symmetric(horizontal: 6.0),
+                                              child: Icon(Icons.close, size: 12,),
+                                            ),
+                                            Text('${item.quantity}', style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
+                                          ],
                                         ),
-                                        Text('5', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 12)),
                                       ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                  const SizedBox(width: 24),
+                                  Text('\$${(item.price * item.quantity).toStringAsFixed(2)}', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+                                ],
                               ),
-                              const SizedBox(width: 24),
-                              const Text('\$149.95', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
+                            );
+                          },
+                        ),
                   ),
                   const SizedBox(height: 24),
                   SizedBox(

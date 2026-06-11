@@ -37,7 +37,7 @@ class TransactionCard extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      transaction.id,
+                      transaction.transactionNumber ?? 'TXN-${transaction.id}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w500,
                         fontSize: 16,
@@ -66,7 +66,7 @@ class TransactionCard extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(transaction.paymentMethod),
                 const SizedBox(width: 16),
-                Text(transaction.time),
+                Text('${transaction.date} ${transaction.time}'),
               ],
             ),
           ],
@@ -89,27 +89,14 @@ class TransactionCard extends StatelessWidget {
   }
 
   Widget _buildTypeChip(String type) {
-    Color color;
-    switch (type) {
-      case 'sale':
-        color = Colors.green;
-        break;
-      case 'refund':
-        color = Colors.orange;
-        break;
-      case 'expense':
-        color = Colors.red;
-        break;
-      default:
-        color = Colors.grey;
-    }
+    Color color = Colors.green;
     return Material(
       borderRadius: BorderRadius.circular(8),
       color: color.withOpacity(0.2),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         child: Text(
-          type[0].toUpperCase() + type.substring(1), // Sale, Refund, Expense
+          'Sale',
           style: TextStyle(
             color: color,
             fontSize: 12,

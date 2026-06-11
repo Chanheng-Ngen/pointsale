@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:point_sale/features/products/providers/product_inventory_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:point_sale/core/widgets/app_drawer.dart';
 import 'package:point_sale/features/products/data/models/product_model.dart';
@@ -16,21 +17,6 @@ class CheckoutScreen extends StatefulWidget {
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _searchController = TextEditingController();
 
-  final List<Product> products = [
-    Product(id: '1',name: 'Wireless Mouse',emoji: '🖱️',price: 29.99,),
-    Product(id: '2', name: 'USB Cable', emoji: '🔌', price: 9.9),
-    Product(id: '3', name: 'Keyboard', emoji: '⌨️', price: 79.99),
-    Product(id: '4', name: 'Monitor', emoji: '🖥️', price: 299.99),
-    Product(id: '5', name: 'Headphones', emoji: '🎧', price: 149.99),
-    Product(id: '6', name: 'Webcam', emoji: '📷', price: 89.99),
-    Product(id: '7', name: 'Mouse Pad', emoji: '📋', price: 19.99),
-    Product(id: '8', name: 'Laptop Stand', emoji: '💻', price: 49.99),
-    Product(id: '9', name: 'Phone Case', emoji: '📱', price: 24.99),
-    Product(id: '10', name: 'Cable Organizer', emoji: '🔗', price: 14.99),
-    Product(id: '11', name: 'Desk Lamp', emoji: '💡', price: 39.99),
-    Product(id: '12', name: 'USB Hub', emoji: '🔌', price: 34.99),
-  ];
-
   @override
   void dispose() {
     _searchController.dispose();
@@ -39,6 +25,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final products = context.watch<ProductInventoryProvider>().products;
+
     return Consumer<CartProvider>(
       builder: (context, cart, child) {
         return Stack(
@@ -53,10 +41,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 shadowColor: Colors.black.withOpacity(0.1),
                 bottom: PreferredSize(
                   preferredSize: const Size.fromHeight(1),
-                  child: Container(
-                    color: const Color(0xFFE5E7EB),
-                    height: 1,
-                  ),
+                  child: Container(color: const Color(0xFFE5E7EB), height: 1),
                 ),
                 leading: Builder(
                   builder: (context) => Container(
@@ -93,14 +78,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     padding: const EdgeInsets.only(right: 16),
                     child: InkWell(
                       onTap: () {
-                        if (cart.totalItems > 0) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CartScreen(),
-                            ),
-                          );
-                        }
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const CartScreen(),
+                          ),
+                        );
                       },
                       borderRadius: BorderRadius.circular(10),
                       child: SizedBox(
@@ -191,7 +174,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 hintStyle: TextStyle(
                                   fontFamily: 'Arimo',
                                   fontSize: 16,
-                                  color: const Color(0xFF0A0A0A).withOpacity(0.5),
+                                  color: const Color(
+                                    0xFF0A0A0A,
+                                  ).withOpacity(0.5),
                                 ),
                                 prefixIcon: const Icon(
                                   Icons.search,
@@ -229,24 +214,38 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     crossAxisCount: 2,
                                     crossAxisSpacing: 12,
                                     mainAxisSpacing: 12,
-                                    childAspectRatio: 0.85,
+                                    mainAxisExtent: 220,
                                   ),
                               itemCount: products.length,
                               itemBuilder: (context, index) {
                                 final product = products[index];
                                 // Get quantity from cart
-                                final cartItem = cart.items.firstWhere(
-                                  (item) => item.id == product.id,
-                                  orElse: () => product,
+                                final cartIndex = cart.items.indexWhere(
+                                  (item) => item.product.id == product.id,
                                 );
-                                
+
+                                final cartQuantity = cartIndex != -1
+                                    ? cart.items[cartIndex].quantity
+                                    : 0;
+
                                 return ProductCard(
-                                  product: cartItem,
+                                  product: product,
+                                  cartQuantity: cartQuantity,
                                   onAddPressed: () {
-                                    cart.addProduct(product);
+                                    final success = cart.addProduct(product);
+                                    if (!success) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Cannot add more. Out of stock!')),
+                                      );
+                                    }
                                   },
                                   onIncrement: () {
-                                    cart.incrementQuantity(product.id);
+                                    final success = cart.incrementQuantity(product.id);
+                                    if (!success) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Cannot add more. Out of stock!')),
+                                      );
+                                    }
                                   },
                                   onDecrement: () {
                                     cart.decrementQuantity(product.id);
