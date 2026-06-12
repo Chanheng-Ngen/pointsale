@@ -10,6 +10,7 @@ class ProductInventory {
   final String status;
   final int minStock;
   final int maxStock;
+  final String? imageUrl;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -23,6 +24,7 @@ class ProductInventory {
     required this.status,
     this.minStock = 10,
     this.maxStock = 100,
+    this.imageUrl,
     this.createdAt,
     this.updatedAt,
   });
@@ -38,6 +40,7 @@ class ProductInventory {
       status: status,
       minStock: minStock,
       maxStock: maxStock,
+      imageUrl: imageUrl,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
@@ -56,6 +59,7 @@ class ProductInventory {
       status: json['status'],
       minStock: _toInt(json['min_stock'], defaultValue: 10),
       maxStock: _toInt(json['max_stock'], defaultValue: 50),
+      imageUrl: json['image_url'],
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'])
           : null,
@@ -90,6 +94,7 @@ class ProductInventory {
       'status': status,
       'min_stock': minStock,
       'max_stock': maxStock,
+      'image_url': imageUrl,
     };
   }
 }

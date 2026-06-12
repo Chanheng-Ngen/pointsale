@@ -58,15 +58,27 @@ class CartItemCard extends StatelessWidget {
                   color: AppColor.borderMedium,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Center(
-                  child: Text(
-                    product.name,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      height: 1.2,
-                    ),
-                  ),
-                ),
+                child: product.imageUrl != null
+                    ? ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          product.imageUrl!,
+                          width: 64,
+                          height: 64,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) =>
+                              const Icon(Icons.image_not_supported, size: 24),
+                        ),
+                      )
+                    : Center(
+                        child: Text(
+                          product.name[0].toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 18,
+                            height: 1.2,
+                          ),
+                        ),
+                      ),
               ),
               const SizedBox(width: 12),
               // Product Info

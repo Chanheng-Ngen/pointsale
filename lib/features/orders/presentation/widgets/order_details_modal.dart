@@ -298,7 +298,19 @@ class OrderDetailsModal extends StatelessWidget {
                                       color: Colors.grey.shade100,
                                       borderRadius: BorderRadius.circular(8),
                                     ),
-                                    child: const Icon(Icons.shopping_bag_outlined, color: Colors.grey),
+                                    child: item.imageUrl != null
+                                        ? ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Image.network(
+                                              item.imageUrl!,
+                                              width: 40,
+                                              height: 40,
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) =>
+                                                  const Icon(Icons.image_not_supported, color: Colors.grey, size: 20),
+                                            ),
+                                          )
+                                        : const Icon(Icons.shopping_bag_outlined, color: Colors.grey),
                                   ),
                                   const SizedBox(width: 12),
                                   Expanded(

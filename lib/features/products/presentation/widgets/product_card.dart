@@ -31,7 +31,38 @@ class ProductCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+          // Product Image
+          if (product.imageUrl != null)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                product.imageUrl!,
+                width: 80,
+                height: 80,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[200],
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(Icons.image_not_supported, color: Colors.grey),
+                ),
+              ),
+            )
+          else
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.grey[100],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.image, color: Colors.grey),
+            ),
+          const SizedBox(height: 12),
           // Product Name
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),

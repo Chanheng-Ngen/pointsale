@@ -61,9 +61,9 @@ class ProductInventoryProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> addProduct(Map<String, dynamic> productData) async {
+  Future<bool> addProduct(Map<String, dynamic> productData, {String? imagePath}) async {
     try {
-      final newProduct = await _apiService.createProduct(productData);
+      final newProduct = await _apiService.createProduct(productData, imagePath: imagePath);
       _products.insert(0, newProduct);
       notifyListeners();
       return true;
@@ -74,9 +74,9 @@ class ProductInventoryProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateProduct(int id, Map<String, dynamic> productData) async {
+  Future<bool> updateProduct(int id, Map<String, dynamic> productData, {String? imagePath}) async {
     try {
-      final updatedProduct = await _apiService.updateProduct(id, productData);
+      final updatedProduct = await _apiService.updateProduct(id, productData, imagePath: imagePath);
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
         _products[index] = updatedProduct;

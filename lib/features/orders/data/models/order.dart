@@ -5,12 +5,14 @@ class OrderItem {
   final String name;
   final int quantity;
   final double price;
+  final String? imageUrl;
 
   OrderItem({
     this.productId,
     required this.name,
     required this.quantity,
     required this.price,
+    this.imageUrl,
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
@@ -19,6 +21,7 @@ class OrderItem {
       name: json['name'] ?? '',
       quantity: json['quantity'] ?? 0,
       price: _toDouble(json['price']),
+      imageUrl: json['product'] != null ? json['product']['image_url'] : null,
     );
   }
 
@@ -28,6 +31,7 @@ class OrderItem {
       'name': name,
       'quantity': quantity,
       'price': price,
+      'image_url': imageUrl,
     };
   }
 }

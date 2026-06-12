@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:point_sale/features/products/data/models/category_model.dart';
 import 'package:provider/provider.dart';
 import 'package:point_sale/features/products/data/models/product_inventory.dart';
@@ -25,6 +27,8 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   bool _isCreatingNewCategory = false;
   bool _isSaving = false;
   Category? _selectedCategory;
+  File? _imageFile;
+  final ImagePicker _picker = ImagePicker();
 
   @override
   void initState() {
@@ -49,6 +53,15 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
     _minStockController.dispose();
     _maxStockController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickImage() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
   }
 
   Future<void> _createCategory() async {
@@ -113,9 +126,9 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
 
       bool success;
       if (widget.productToEdit != null) {
-        success = await provider.updateProduct(widget.productToEdit!.id!, productData);
+        success = await provider.updateProduct(widget.productToEdit!.id!, productData, imagePath: _imageFile?.path);
       } else {
-        success = await provider.addProduct(productData);
+        success = await provider.addProduct(productData, imagePath: _imageFile?.path);
       }
 
       if (mounted) {
@@ -165,6 +178,43 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
+                ),
+                const SizedBox(height: 24),
+
+                // Image Picker
+                _buildLabel('Product Image'),
+                const SizedBox(height: 8),
+                Center(
+                  child: GestureDetector(
+                    onTap: _pickImage,
+                    child: Container(
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF3F4F6),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFD1D5DC), width: 1),
+                      ),
+                      child: _imageFile != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.file(_imageFile!, fit: BoxFit.cover),
+                            )
+                          : widget.productToEdit?.imageUrl != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Image.network(widget.productToEdit!.imageUrl!, fit: BoxFit.cover),
+                                )
+                              : const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.add_a_photo, color: Color(0xFF9CA3AF), size: 32),
+                                    SizedBox(height: 4),
+                                    Text('Upload', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 12)),
+                                  ],
+                                ),
+                    ),
+                  ),
                 ),
                 const SizedBox(height: 24),
 
