@@ -1,10 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:point_sale/features/products/data/models/category_model.dart';
 import 'package:provider/provider.dart';
 import 'package:point_sale/features/products/data/models/product_inventory.dart';
 import 'package:point_sale/features/products/providers/product_inventory_provider.dart';
+import 'dart:typed_data';
 
 class ProductFormDialog extends StatefulWidget {
   final ProductInventory? productToEdit;
@@ -27,7 +27,7 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   bool _isCreatingNewCategory = false;
   bool _isSaving = false;
   Category? _selectedCategory;
-  File? _imageFile;
+  XFile? _imageFile;
   final ImagePicker _picker = ImagePicker();
 
   @override
@@ -56,10 +56,13 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
   }
 
   Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
+
     if (pickedFile != null) {
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _imageFile = pickedFile;
       });
     }
   }
@@ -126,9 +129,16 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
 
       bool success;
       if (widget.productToEdit != null) {
-        success = await provider.updateProduct(widget.productToEdit!.id!, productData, imagePath: _imageFile?.path);
+        success = await provider.updateProduct(
+          widget.productToEdit!.id!,
+          productData,
+          imageFile: _imageFile,
+        );
       } else {
-        success = await provider.addProduct(productData, imagePath: _imageFile?.path);
+        success = await provider.addProduct(
+          productData,
+          imageFile: _imageFile,
+        );
       }
 
       if (mounted) {
@@ -196,23 +206,50 @@ class _ProductFormDialogState extends State<ProductFormDialog> {
                         border: Border.all(color: const Color(0xFFD1D5DC), width: 1),
                       ),
                       child: _imageFile != null
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: FutureBuilder<Uint8List>(
+                            future: _imageFile!.readAsBytes(),
+                            builder: (context, snapshot) {
+                              if (snapshot.hasData) {
+                                return Image.memory(
+                                  snapshot.data!,
+                                  fit: BoxFit.cover,
+                                );
+                              }
+
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            },
+                          ),
+                        )
+                      : widget.productToEdit?.imageUrl != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(12),
-                              child: Image.file(_imageFile!, fit: BoxFit.cover),
+                              child: Image.network(
+                                widget.productToEdit!.imageUrl!,
+                                fit: BoxFit.cover,
+                              ),
                             )
-                          : widget.productToEdit?.imageUrl != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: Image.network(widget.productToEdit!.imageUrl!, fit: BoxFit.cover),
-                                )
-                              : const Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.add_a_photo, color: Color(0xFF9CA3AF), size: 32),
-                                    SizedBox(height: 4),
-                                    Text('Upload', style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 12)),
-                                  ],
+                          : const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.add_a_photo,
+                                  color: Color(0xFF9CA3AF),
+                                  size: 32,
                                 ),
+                                SizedBox(height: 4),
+                                Text(
+                                  'Upload',
+                                  style: TextStyle(
+                                    color: Color(0xFF9CA3AF),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
                     ),
                   ),
                 ),

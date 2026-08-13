@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:point_sale/app/app_routes.dart';
 import 'package:point_sale/features/auth/data/auth_service.dart';
 import 'package:point_sale/core/widgets/base_text_field.dart';
+import 'package:point_sale/core/constants/app_color.dart';
 import 'package:point_sale/core/widgets/base_button.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -12,6 +13,11 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  final _nameFocusNode = FocusNode();
+  final _emailFocusNode = FocusNode();
+  final _passwordFocusNode = FocusNode();
+  final _confirmPasswordFocusNode = FocusNode();
+
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -23,6 +29,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   @override
   void dispose() {
+    _nameFocusNode.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
+    _confirmPasswordFocusNode.dispose();
+
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -162,6 +173,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         hintText: 'Enter your name',
                         controller: _nameController,
                         prefixIcon: Icons.person_outline,
+                        focusNode: _nameFocusNode,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) {
+                          _emailFocusNode.requestFocus();
+                        },
                       ),
                       const SizedBox(height: 16),
 
@@ -172,6 +188,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _emailController,
                         prefixIcon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
+                        focusNode: _emailFocusNode,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) {
+                          _passwordFocusNode.requestFocus();
+                        },
                       ),
                       const SizedBox(height: 16),
 
@@ -182,6 +203,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _passwordController,
                         prefixIcon: Icons.lock_outline,
                         obscureText: _obscurePassword,
+                        focusNode: _passwordFocusNode,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) {
+                          _confirmPasswordFocusNode.requestFocus();
+                        },
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword
@@ -206,6 +232,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         controller: _confirmPasswordController,
                         prefixIcon: Icons.lock_outline,
                         obscureText: _obscureConfirmPassword,
+                        focusNode: _confirmPasswordFocusNode,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) {
+                          _handleSignUp();
+                        },
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscureConfirmPassword
@@ -298,14 +329,19 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                     const SizedBox(width: 8),
-                    GestureDetector(
-                      onTap: _navigateToSignIn,
-                      child: const Text(
-                        'Sign in',
+                    TextButton(
+                      onPressed: _navigateToSignIn,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.only(left: 8),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'Sign In',
                         style: TextStyle(
                           fontFamily: 'Arimo',
                           fontSize: 16,
-                          color: Color(0xFF00B8DB),
+                          color: AppColor.primary,
                           height: 1.5,
                         ),
                       ),

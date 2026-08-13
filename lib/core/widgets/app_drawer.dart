@@ -227,28 +227,17 @@ class AppDrawer extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 17),
             child: InkWell(
               onTap: () async {
-                final result = await AuthService().logout();
+                await AuthService().logout();
 
                 if (!context.mounted) {
                   return;
                 }
 
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(result.message),
-                    backgroundColor: result.success
-                        ? const Color(0xFF00D492)
-                        : AppColor.error,
-                  ),
+                Navigator.pushNamedAndRemoveUntil(
+                  context,
+                  AppRoutes.signin,
+                  (route) => false,
                 );
-
-                if (result.success) {
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
-                    AppRoutes.signin,
-                    (route) => false,
-                  );
-                }
               },
               borderRadius: BorderRadius.circular(14),
               child: Padding(

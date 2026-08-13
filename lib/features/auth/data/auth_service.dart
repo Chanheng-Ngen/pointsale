@@ -131,53 +131,74 @@ class AuthService {
     }
   }
 
-  Future<LogoutResult> logout() async {
+  Future<bool> restoreSession() async {
     try {
       final token = await getToken();
-      final headers = <String, String>{
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-      };
 
-      if (token != null && token.trim().isNotEmpty) {
-        headers['Authorization'] = 'Bearer ${token.trim()}';
+      if (token == null || token.trim().isEmpty) {
+        return false;
       }
 
-      final response = await http.delete(
-        Uri.parse(_logoutUrl),
-        headers: headers,
+      final response = await http.get(
+        Uri.parse(_meUrl),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ${token.trim()}',
+        },
       ).timeout(const Duration(seconds: 15));
 
-      final jsonBody = response.body.isNotEmpty
-          ? jsonDecode(response.body) as Map<String, dynamic>
-          : <String, dynamic>{};
+      if (response.statusCode == 200) {
+        final jsonBody = response.body.isNotEmpty
+            ? jsonDecode(response.body) as Map<String, dynamic>
+            : <String, dynamic>{};
 
-      if (response.statusCode == 200 || response.statusCode == 204) {
-        await _clearToken();
-        UserSession.instance.clear();
+        final user = jsonBody['data'];
 
-        return LogoutResult(
-          success: true,
-          message: _extractSuccessMessage(jsonBody) ?? 'Logged out successfully.',
-        );
+        if (user is Map<String, dynamic>) {
+          UserSession.instance.user = user;
+          return true;
+        }
       }
 
-      return LogoutResult(
-        success: false,
-        message: _extractErrorMessage(jsonBody) ??
-          'Logout failed (${response.statusCode}). Please try again.',
-      );
-    } on TimeoutException {
-      return LogoutResult(
-        success: false,
-        message: 'Request timed out. Please check your network and try again.',
-      );
+      await _clearToken();
+      UserSession.instance.clear();
+
+      return false;
     } catch (e) {
-      final details = kDebugMode ? ' (${e.toString()})' : '';
-      return LogoutResult(
-        success: false,
-        message: 'Unable to connect to server. Please check your network and try again.$details',
-      );
+      if (kDebugMode) {
+        print('Failed to restore session: $e');
+      }
+
+      return false;
+    }
+  }
+
+  Future<void> logout() async {
+    final token = await getToken();
+
+    // Log out locally immediately.
+    await _clearToken();
+    UserSession.instance.clear();
+
+    // No token means there is nothing to tell the server about.
+    if (token == null || token.trim().isEmpty) {
+      return;
+    }
+
+    // Tell Laravel to invalidate the old Sanctum token.
+    try {
+      await http.delete(
+        Uri.parse(_logoutUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer ${token.trim()}',
+        },
+      ).timeout(const Duration(seconds: 15));
+    } catch (e) {
+      if (kDebugMode) {
+        print('Server logout failed: $e');
+      }
     }
   }
 

@@ -20,6 +20,7 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('IMAGE URL: ${product.imageUrl}');
     return Container(
       decoration: BoxDecoration(
         color: AppColor.whiteWithOpacity(0.95),

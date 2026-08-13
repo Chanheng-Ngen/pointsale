@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:point_sale/core/constants/app_color.dart';
+
 class BaseTextField extends StatelessWidget {
   final String label;
   final String hintText;
@@ -8,6 +9,9 @@ class BaseTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final TextInputType? keyboardType;
+  final FocusNode? focusNode;
+  final TextInputAction? textInputAction;
+  final ValueChanged<String>? onSubmitted;
 
   const BaseTextField({
     super.key,
@@ -18,6 +22,9 @@ class BaseTextField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.keyboardType,
+    this.focusNode,
+    this.textInputAction,
+    this.onSubmitted,
   });
 
   @override
@@ -39,6 +46,9 @@ class BaseTextField extends StatelessWidget {
           controller: controller,
           obscureText: obscureText,
           keyboardType: keyboardType,
+          focusNode: focusNode,
+          textInputAction: textInputAction,
+          onSubmitted: onSubmitted,
           decoration: InputDecoration(
             hintText: hintText,
             hintStyle: TextStyle(

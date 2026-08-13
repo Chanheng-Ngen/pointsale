@@ -16,7 +16,9 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordFocusNode = FocusNode();
   final _authService = AuthService();
+
   bool _obscurePassword = true;
   bool _isLoading = false;
 
@@ -24,6 +26,7 @@ class _SignInScreenState extends State<SignInScreen> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -144,6 +147,10 @@ class _SignInScreenState extends State<SignInScreen> {
                         controller: _emailController,
                         prefixIcon: Icons.email_outlined,
                         keyboardType: TextInputType.emailAddress,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: (_) {
+                          _passwordFocusNode.requestFocus();
+                        },
                       ),
                       const SizedBox(height: 16),
 
@@ -154,6 +161,11 @@ class _SignInScreenState extends State<SignInScreen> {
                         controller: _passwordController,
                         prefixIcon: Icons.lock_outline,
                         obscureText: _obscurePassword,
+                        focusNode: _passwordFocusNode,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) {
+                          _handleSignIn();
+                        },
                         suffixIcon: IconButton(
                           icon: Icon(
                             _obscurePassword

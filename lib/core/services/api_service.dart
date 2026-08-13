@@ -5,6 +5,7 @@ import 'package:point_sale/features/products/data/models/category_model.dart';
 import 'package:http/http.dart' as http;
 import 'package:point_sale/features/products/data/models/product_inventory.dart';
 import 'package:point_sale/features/home/data/models/dashboard_stats.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ApiService {
   Future<dynamic> get(String endpoint) async {
@@ -99,7 +100,7 @@ class ApiService {
     return data.map((json) => ProductInventory.fromJson(json)).toList();
   }
 
-  Future<ProductInventory> createProduct(Map<String, dynamic> productData, {String? imagePath}) async {
+  Future<ProductInventory> createProduct(Map<String, dynamic> productData, {XFile? imageFile}) async {
     final token = await AuthService().getToken();
     var request = http.MultipartRequest('POST', Uri.parse(ApiConstants.products));
     
@@ -114,8 +115,16 @@ class ApiService {
       }
     });
 
-    if (imagePath != null) {
-      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+    if (imageFile != null) {
+      final bytes = await imageFile.readAsBytes();
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'image',
+          bytes,
+          filename: imageFile.name,
+        ),
+      );
     }
 
     final streamedResponse = await request.send();
@@ -129,7 +138,7 @@ class ApiService {
     throw Exception(errorBody['message'] ?? 'Failed to create product');
   }
 
-  Future<ProductInventory> updateProduct(int id, Map<String, dynamic> productData, {String? imagePath}) async {
+  Future<ProductInventory> updateProduct(int id, Map<String, dynamic> productData, {XFile? imageFile}) async {
     final token = await AuthService().getToken();
     // Laravel PUT doesn't work well with multipart/form-data, so we use POST with _method=PUT
     var request = http.MultipartRequest('POST', Uri.parse('${ApiConstants.products}/$id'));
@@ -146,8 +155,16 @@ class ApiService {
       }
     });
 
-    if (imagePath != null) {
-      request.files.add(await http.MultipartFile.fromPath('image', imagePath));
+    if (imageFile != null) {
+      final bytes = await imageFile.readAsBytes();
+
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'image',
+          bytes,
+          filename: imageFile.name,
+        ),
+      );
     }
 
     final streamedResponse = await request.send();

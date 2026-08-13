@@ -3,6 +3,7 @@ import 'package:point_sale/core/constants/api_constants.dart';
 import 'package:point_sale/core/services/api_service.dart';
 import 'package:point_sale/features/products/data/models/category_model.dart';
 import 'package:point_sale/features/products/data/models/product_inventory.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProductInventoryProvider extends ChangeNotifier {
   ProductInventoryProvider() {
@@ -61,9 +62,15 @@ class ProductInventoryProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> addProduct(Map<String, dynamic> productData, {String? imagePath}) async {
+  Future<bool> addProduct(
+    Map<String, dynamic> productData, {
+    XFile? imageFile,
+  }) async {
     try {
-      final newProduct = await _apiService.createProduct(productData, imagePath: imagePath);
+      final newProduct = await _apiService.createProduct(
+        productData,
+        imageFile: imageFile,
+      );
       _products.insert(0, newProduct);
       notifyListeners();
       return true;
@@ -74,9 +81,17 @@ class ProductInventoryProvider extends ChangeNotifier {
     }
   }
 
-  Future<bool> updateProduct(int id, Map<String, dynamic> productData, {String? imagePath}) async {
+  Future<bool> updateProduct(
+    int id,
+    Map<String, dynamic> productData, {
+    XFile? imageFile,
+  }) async {
     try {
-      final updatedProduct = await _apiService.updateProduct(id, productData, imagePath: imagePath);
+      final updatedProduct = await _apiService.updateProduct(
+        id,
+        productData,
+        imageFile: imageFile,
+      );
       final index = _products.indexWhere((p) => p.id == id);
       if (index != -1) {
         _products[index] = updatedProduct;
